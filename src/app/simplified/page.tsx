@@ -201,7 +201,7 @@ export default function CourseSelectionPage() {
     const { selectedScheme, setSelectedScheme } = usePreferences();
     
     // Feature Flag check
-    const isSimplifiedEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow);
+    const isSimplifiedEnabled = process.env.NODE_ENV !== "production" || (useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow) ?? false);
 
     // Local selections
     const [selectedOptions, setSelectedOptions] = useState<CourseOption[]>([]);
@@ -545,49 +545,95 @@ export default function CourseSelectionPage() {
                 <main className="w-full max-w-6xl flex flex-col gap-6">
                     
                     {/* Course Search Box */}
-                    <div className="bg-white rounded-3xl p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.015)] border border-[#eaeaea]/80 flex flex-col gap-4 relative">
-                        <div>
-                            <h2 className="text-xl font-bold text-black flex items-center gap-2">
-                                Search & Add Courses
-                            </h2>
-                            <p className="text-xs text-gray-500 mt-0.5">Type the course code or title (e.g. CSE1001 or Data Structures)</p>
-                        </div>
+                    <div className="relative isolate overflow-hidden rounded-[30px] border border-[#e7dcc2] bg-gradient-to-br from-[#fffefb] via-[#fffaf0] to-[#f7f0e3] p-5 md:p-6 shadow-[0_18px_50px_rgba(89,67,32,0.08)] z-20">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-[#3B5BDB] via-[#f4c86a] to-[#4db37d]" />
 
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search by code or title..."
-                                className="w-full bg-[#FAFAFA] border border-[#eadcc5]/80 rounded-2xl px-4 py-3.5 text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/60"
-                            />
-                            {searchTerm && (
-                                <button
-                                    onClick={() => setSearchTerm('')}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black text-lg font-medium"
-                                >
-                                    ✕
-                                </button>
-                            )}
-
-                            {/* Search Results Dropdown Overlay */}
-                            {searchResults.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#eadcc5]/80 rounded-2xl shadow-xl z-30 max-h-72 overflow-y-auto custom-scrollbar p-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    {searchResults.map((result) => (
-                                        <button
-                                            key={result.code}
-                                            onClick={() => {
-                                                setActiveCourseCode(result.code);
-                                                setSearchTerm('');
-                                            }}
-                                            className="w-full text-left px-4 py-3 hover:bg-[#F5E6D3]/40 rounded-xl transition-colors flex flex-col gap-0.5 cursor-pointer"
-                                        >
-                                            <span className="font-bold text-xs text-[#3B5BDB] uppercase tracking-wider">{result.code}</span>
-                                            <span className="font-bold text-sm text-gray-900 line-clamp-1">{result.title}</span>
-                                        </button>
-                                    ))}
+                        <div className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div className="max-w-2xl">
+                                    <div className="inline-flex items-center gap-2 rounded-full border border-[#d7e3ff] bg-[#edf3ff] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#3B5BDB] md:tracking-[0.22em]">
+                                        Course Discovery
+                                    </div>
+                                    <h2 className="mt-3 text-[22px] font-black tracking-tight text-[#111827] md:text-[27px]">
+                                        Search & Add Courses
+                                    </h2>
+                                    <p className="mt-1.5 text-sm leading-6 text-[#6b7280] md:text-[15px]">
+                                        Type a course code or title to browse matching classes and open the faculty options below.
+                                    </p>
                                 </div>
-                            )}
+
+                                <div className="grid grid-cols-2 gap-3 lg:w-[240px] lg:grid-cols-1">
+                                    <div className="rounded-2xl border border-[#e7dcc2] bg-white/80 px-4 py-3 text-left shadow-sm">
+                                        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8c6b5e] md:tracking-[0.2em]">Selected</div>
+                                        <div className="mt-1 text-lg font-black text-[#111827] md:text-xl">{selectedOptions.length}</div>
+                                    </div>
+                                    <div className="rounded-2xl border border-[#d7e3ff] bg-[#f7f9ff] px-4 py-3 text-left shadow-sm">
+                                        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3B5BDB] md:tracking-[0.2em]">Matches</div>
+                                        <div className="mt-1 text-lg font-black text-[#111827] md:text-xl">{searchResults.length}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8b95a7]">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                        <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Search by code or title..."
+                                    className="w-full rounded-[22px] border border-[#d8dbe2] bg-white/95 px-12 py-3.5 text-[14px] font-semibold text-[#111827] shadow-[0_10px_24px_rgba(15,23,42,0.04)] outline-none transition-all placeholder:font-medium placeholder:text-[#9ca3af] focus:border-[#6f86e8] focus:ring-4 focus:ring-[#3B5BDB]/15 md:py-4 md:text-[15px]"
+                                />
+                                {searchTerm && (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#9ca3af] transition-colors hover:bg-[#f3f4f6] hover:text-[#111827]"
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                                        </svg>
+                                    </button>
+                                )}
+
+                                {searchResults.length > 0 && (
+                                    <div className="mt-3 max-h-80 overflow-y-auto rounded-[24px] border border-[#eadcc5]/80 bg-white/98 p-2 shadow-[0_18px_50px_rgba(15,23,42,0.14)] backdrop-blur-md custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="sticky top-0 z-10 mb-2 flex items-center justify-between rounded-2xl border border-[#f3e6cf] bg-[#fffaf0] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8c6b5e] md:text-[11px] md:tracking-[0.18em]">
+                                            <span>Results</span>
+                                            <span>{searchResults.length} shown</span>
+                                        </div>
+                                        <div className="flex flex-col gap-1.5">
+                                            {searchResults.map((result) => (
+                                                <button
+                                                    key={result.code}
+                                                    onClick={() => {
+                                                        setActiveCourseCode(result.code);
+                                                        setSearchTerm('');
+                                                    }}
+                                                    className="group w-full rounded-[18px] border border-transparent px-4 py-3 text-left transition-all hover:border-[#c9d5ff] hover:bg-[#f8fbff] hover:shadow-[0_10px_26px_rgba(59,91,219,0.09)] cursor-pointer"
+                                                >
+                                                    <div className="flex items-start justify-between gap-3 sm:gap-4">
+                                                        <div className="min-w-0">
+                                                            <span className="inline-flex rounded-full bg-[#edf3ff] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#3B5BDB] md:text-[10px] md:tracking-[0.2em]">
+                                                                {result.code}
+                                                            </span>
+                                                            <span className="mt-2 block text-[14px] font-extrabold leading-5 text-[#111827] line-clamp-1 md:text-[15px]">
+                                                                {result.title}
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-1 rounded-full border border-[#e5e7eb] bg-white px-2.5 py-1 text-[10px] font-bold text-[#6b7280] transition-colors group-hover:border-[#c9d5ff] group-hover:text-[#3B5BDB] md:text-[11px]">
+                                                            Add
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
