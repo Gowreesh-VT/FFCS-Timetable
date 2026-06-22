@@ -1,0 +1,352 @@
+{
+  "generatedAt": "2026-06-21T18:55:32.592Z",
+  "routes": [
+    {
+      "path": "/api/courses",
+      "filePath": "src/app/api/courses/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "GET /api/courses?q=BCSE202&school=SCOPE&limit=20 Search for courses by courseId or courseName. Results are ordered by relevance (text score) when a query is given, otherwise returns the first `limit` courses.",
+      "auth": "None (Public)"
+    },
+    {
+      "path": "/api/feedback",
+      "filePath": "src/app/api/feedback/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "No description provided.",
+      "auth": "None (Public)"
+    },
+    {
+      "path": "/api/save-timetable",
+      "filePath": "src/app/api/save-timetable/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "No description provided.",
+      "auth": "Required (Session/OAuth)"
+    },
+    {
+      "path": "/api/sentry-example-api",
+      "filePath": "src/app/api/sentry-example-api/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "No description provided.",
+      "auth": "None (Public)"
+    },
+    {
+      "path": "/api/shared-timetable/[shareId]",
+      "filePath": "src/app/api/shared-timetable/[shareId]/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "No description provided.",
+      "auth": "None (Public)"
+    },
+    {
+      "path": "/api/slots",
+      "filePath": "src/app/api/slots/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "No description provided.",
+      "auth": "None (Public)"
+    },
+    {
+      "path": "/api/timetables/[id]",
+      "filePath": "src/app/api/timetables/[id]/route.ts",
+      "methods": [
+        "DELETE",
+        "PATCH",
+        "GET"
+      ],
+      "purpose": "No description provided.",
+      "auth": "Required (Session/OAuth)"
+    },
+    {
+      "path": "/api/timetables",
+      "filePath": "src/app/api/timetables/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "No description provided.",
+      "auth": "Required (Session/OAuth)"
+    },
+    {
+      "path": "/api/user/onboarding-tour",
+      "filePath": "src/app/api/user/onboarding-tour/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "purpose": "No description provided.",
+      "auth": "Required (Session/OAuth)"
+    }
+  ],
+  "models": [
+    {
+      "name": "Course",
+      "filePath": "src/models/course.ts",
+      "fields": [
+        {
+          "name": "faculty",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "slot",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "venue",
+          "definition": "{ type: String, default: '' }"
+        }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "filePath": "src/models/feedback.ts",
+      "fields": [
+        {
+          "name": "feedback",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "userName",
+          "definition": "{ type: String, default: \"Anonymous\" }"
+        },
+        {
+          "name": "email",
+          "definition": "{ type: String, default: \"No Email\" }"
+        }
+      ]
+    },
+    {
+      "name": "Timetable",
+      "filePath": "src/models/timetable.ts",
+      "fields": [
+        {
+          "name": "title",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "owner",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "isPublic",
+          "definition": "{ type: Boolean, default: false }"
+        },
+        {
+          "name": "shareId",
+          "definition": "{ type: String, unique: true, sparse: true }"
+        },
+        {
+          "name": "slots",
+          "definition": "["
+        },
+        {
+          "name": "slot",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "courseCode",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "courseName",
+          "definition": "{ type: String, required: true }"
+        },
+        {
+          "name": "facultyName",
+          "definition": "{ type: String, required: true }"
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "filePath": "src/models/user.ts",
+      "fields": [
+        {
+          "name": "userName",
+          "definition": "{ type: String, required: true, trim: true }"
+        },
+        {
+          "name": "email",
+          "definition": "{"
+        },
+        {
+          "name": "type",
+          "definition": "String"
+        },
+        {
+          "name": "required",
+          "definition": "true"
+        },
+        {
+          "name": "unique",
+          "definition": "true"
+        },
+        {
+          "name": "lowercase",
+          "definition": "true"
+        },
+        {
+          "name": "trim",
+          "definition": "true"
+        },
+        {
+          "name": "savedCourseData",
+          "definition": "{"
+        },
+        {
+          "name": "type",
+          "definition": "[[{ faculty: String, facultySlot: [String] }]]"
+        },
+        {
+          "name": "default",
+          "definition": "[]"
+        },
+        {
+          "name": "favourites",
+          "definition": "{"
+        },
+        {
+          "name": "type",
+          "definition": "["
+        },
+        {
+          "name": "name",
+          "definition": "String"
+        },
+        {
+          "name": "TTdata",
+          "definition": "[{ faculty: String, facultySlot: [String] }]"
+        },
+        {
+          "name": "courseNames",
+          "definition": "[String]"
+        },
+        {
+          "name": "default",
+          "definition": "[]"
+        },
+        {
+          "name": "onboardingTours",
+          "definition": "{"
+        },
+        {
+          "name": "plannerOnboardingTourCompletedAt",
+          "definition": "{ type: Date }"
+        }
+      ]
+    }
+  ],
+  "envs": [
+    {
+      "name": "CI",
+      "purpose": "Environment configuration variable used by application components.",
+      "files": [
+        "next.config.ts"
+      ]
+    },
+    {
+      "name": "CONTACT_EMAIL",
+      "purpose": "Default email recipient inbox address for user feedback reports",
+      "files": [
+        "src/app/api/feedback/route.ts"
+      ]
+    },
+    {
+      "name": "MONGODB_URI",
+      "purpose": "Connection string for MongoDB database",
+      "files": [
+        "src/lib/db.ts",
+        "src/lib/mongodb-client.ts"
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_POSTHOG_HOST",
+      "purpose": "PostHog API routing destination endpoint",
+      "files": [
+        "src/components/Providers.tsx"
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN",
+      "purpose": "Public client token for PostHog event analytics telemetry",
+      "files": [
+        "src/components/Providers.tsx"
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SENTRY_DSN",
+      "purpose": "Publicly exposed Sentry error-reporting destination URL",
+      "files": [
+        "sentry.client.config.ts",
+        "sentry.edge.config.ts",
+        "sentry.server.config.ts"
+      ]
+    },
+    {
+      "name": "NEXT_RUNTIME",
+      "purpose": "Environment configuration variable used by application components.",
+      "files": [
+        "instrumentation.ts"
+      ]
+    },
+    {
+      "name": "NODE_ENV",
+      "purpose": "Environment configuration variable used by application components.",
+      "files": [
+        "src/middleware.ts",
+        "sentry.client.config.ts"
+      ]
+    },
+    {
+      "name": "RESEND_API_KEY",
+      "purpose": "API token for sending transaction-based notifications via Resend email service",
+      "files": [
+        "src/app/api/feedback/route.ts"
+      ]
+    },
+    {
+      "name": "SENTRY_DSN",
+      "purpose": "Backend/server Sentry endpoint DSN for error ingestion",
+      "files": [
+        "sentry.edge.config.ts",
+        "sentry.server.config.ts"
+      ]
+    },
+    {
+      "name": "SENTRY_ORG",
+      "purpose": "Target organization identifier for Sentry CLI releases",
+      "files": [
+        "next.config.ts"
+      ]
+    },
+    {
+      "name": "SENTRY_PROJECT",
+      "purpose": "Target project name for Sentry issue classification",
+      "files": [
+        "next.config.ts"
+      ]
+    },
+    {
+      "name": "UPSTASH_REDIS_REST_TOKEN",
+      "purpose": "Authorization Bearer token for Upstash Redis REST access",
+      "files": [
+        "src/lib/rateLimit.ts"
+      ]
+    },
+    {
+      "name": "UPSTASH_REDIS_REST_URL",
+      "purpose": "REST API base URL for Upstash Redis database hosting",
+      "files": [
+        "src/lib/rateLimit.ts"
+      ]
+    }
+  ]
+}

@@ -245,6 +245,12 @@ export default function CoursesPage() {
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [showRemoveAllToast, setShowRemoveAllToast] = useState(false);
     const removeAllToastTimerRef = useRef<number | null>(null);
+    const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+
+    const navigateWithLoader = (path: string, label: string) => {
+        setNavigatingTo(label);
+        setTimeout(() => router.push(path), 250);
+    };
 
     const [deletedRow, setDeletedRow] = useState<{ faculty: FacultyEntry; index: number } | null>(null);
 
@@ -451,6 +457,7 @@ export default function CoursesPage() {
         setFaculties([]);
         setDeletedRow(null);
         setShowRemoveAllToast(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleUndoRemoveAll = () => {
@@ -516,6 +523,16 @@ export default function CoursesPage() {
 
     return (
         <div className={`h-screen bg-[#F5E6D3] font-sans flex flex-col overflow-hidden transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            {/* Navigation Loader Overlay */}
+            {navigatingTo && (
+                <div className="fixed inset-0 z-[9999] bg-[#F5E6D3]/80 backdrop-blur-sm flex flex-col items-center justify-center gap-5">
+                    <div className="relative w-14 h-14">
+                        <div className="absolute inset-0 rounded-full border-4 border-[#eadcc5]/50" />
+                        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500" style={{ animation: 'spin 0.8s linear infinite' }} />
+                    </div>
+                    <span className="text-sm font-bold text-gray-600 tracking-wide">{navigatingTo}</span>
+                </div>
+            )}
             <div className="flex-1 min-h-0 w-full flex justify-center px-4 sm:px-6 pt-6 pb-[160px] md:pb-29">
                 <div className="w-full max-w-6xl min-h-0 flex flex-col gap-4">
                     <div className="flex flex-row items-center justify-between gap-4 px-2 pt-2 pb-1 shrink-0 w-full">
@@ -523,19 +540,19 @@ export default function CoursesPage() {
                             <h1 className="text-3xl sm:text-4xl font-bold text-black">Your Courses</h1>
                         </div>
                         {isSimplifiedEnabled && (
-                            <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E2E6EA] px-3 py-2 shadow-sm border border-gray-300/40">
-                                <span className="text-sm font-extrabold text-gray-700 whitespace-nowrap">
-                                    Course Selection Mode
+                            <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E9F3E8] px-3 py-2 shadow-sm border border-[#D4F4E6]">
+                                <span className="text-sm font-extrabold text-green-900 whitespace-nowrap">
+                                    Simplified Mode
                                 </span>
                                 <button
                                     type="button"
                                     role="switch"
-                                    onClick={() => router.push('/simplified')}
+                                    onClick={() => navigateWithLoader('/simplified', 'Switching to Simplified Mode...')}
                                     aria-checked={false}
-                                    aria-label="Toggle course selection mode"
-                                    className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-gray-300 focus:outline-none cursor-pointer"
+                                    aria-label="Toggle simplified mode"
+                                    className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-[#A7D7C5] hover:bg-[#86cbb3] focus:outline-none cursor-pointer"
                                 >
-                                    <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white" />
+                                    <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
                                 </button>
                             </div>
                         )}
@@ -768,8 +785,11 @@ export default function CoursesPage() {
                             {session?.user?.image ? (
                                 <Image src={session.user.image} alt="User avatar" width={38} height={38} className="w-9.5 h-9.5 rounded-lg border border-gray-100 shrink-0" referrerPolicy="no-referrer" />
                             ) : (
-                                <div className="w-9 h-9 bg-gray-300 rounded-lg flex items-center justify-center font-bold text-white text-sm shrink-0">
-                                    {session?.user?.name?.[0] || "?"}
+                                <div className="w-9 h-9 bg-gray-200 rounded-lg flex items-center justify-center shrink-0">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                                    </svg>
                                 </div>
                             )}
                             <span className="text-gray-800 text-sm font-bold truncate max-w-50 pr-2">

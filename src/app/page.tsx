@@ -333,66 +333,104 @@ export default function LandingPage() {
             <div className="hero-buttons">
               <button className="btn-primary" onClick={() => setOpen(true)}>Get Started</button>
               {open && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-                  <div className="flex items-center justify-center w-full max-w-4xl bg-[#FFFCEE] rounded-[20px] shadow-xl p-6 mx-4 relative">
-                    <div className="relative bg-[#FAFAFA] w-full flex flex-col items-center rounded-[20px] p-8 shadow-[4px_4px_4px_rgba(191,191,191,0.25)]">
-                      <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-black text-[28px] z-10">✕</button>
-                      <h2 className="text-[clamp(22px,3vw,32px)] font-semibold text-center mb-2 mt-2">
+                <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-6">
+                  {/* Backdrop */}
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300" onClick={() => setOpen(false)}></div>
+                  
+                  {/* Modal Container */}
+                  <div className="relative w-full max-w-4xl bg-[#FAFAFA] border border-gray-100 rounded-[32px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] p-8 sm:p-12 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+
+                    <button 
+                      onClick={() => setOpen(false)} 
+                      className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-white text-gray-500 hover:text-gray-900 transition-all duration-200 hover:scale-110 shadow-sm z-10 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                      aria-label="Close modal"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 1L1 13M1 1L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+
+                    <div className="text-center mb-10 relative z-10">
+                      <h2 className="text-3xl sm:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 tracking-tight mb-3">
                         Welcome {session?.user?.name ? `back, ${session.user.name}` : "to FFCS"}!
                       </h2>
-                      <div className="w-full max-w-175 h-px bg-gray-300 mb-4"></div>
-                      <p className="text-center text-[clamp(16px,2vw,20px)] mb-8">Choose what you&apos;d like to do next</p>
-                      <div className="flex flex-wrap gap-4 justify-center mb-4">
-                        {isSimplifiedEnabled ? (
-                          <>
-                            <button
-                              className="flex flex-col items-center justify-start bg-[#E9F3E8] border-[5px] border-[#D4F4E6] rounded-2xl p-4 pt-5 w-56 max-w-full h-52 shadow hover:bg-green-200 transition text-black text-center cursor-pointer"
-                              onClick={() => {
-                                setOpen(false);
-                                router.push('/simplified');
-                              }}
-                            >
-                              <Image src="/create_new.png" alt="create" width={95} height={55} className="object-contain" />
-                              <p className="font-bold text-sm mt-2">Course Selection</p>
-                              <p className="text-[10px] text-gray-500 mt-1 px-1 leading-normal">Real-time search & single-page layout (Recommended)</p>
-                            </button>
-                            <button
-                              className="flex flex-col items-center justify-start bg-[#FEF3C7] border-[5px] border-[#FDE68A] rounded-2xl p-4 pt-5 w-56 max-w-full h-52 shadow hover:bg-amber-200 transition text-black text-center cursor-pointer"
-                              onClick={() => {
-                                setOpen(false);
-                                router.push('/preferences');
-                              }}
-                            >
-                              <Image src="/create_new.png" alt="advanced" width={95} height={55} className="object-contain hue-rotate-60" />
-                              <p className="font-bold text-sm mt-2">Advanced Preferences</p>
-                              <p className="text-[10px] text-gray-500 mt-1 px-1 leading-normal">Classic step-by-step slot & faculty priorities</p>
-                            </button>
-                          </>
-                        ) : (
-                          <button className="flex flex-col items-center justify-start bg-[#E9F3E8] border-[5px] border-[#D4F4E6] rounded-2xl p-4 pt-5 w-56 max-w-full h-52 shadow hover:bg-green-200 transition text-black cursor-pointer" onClick={() => { setOpen(false); router.push('/preferences'); }}>
-                            <Image src="/create_new.png" alt="create" width={110} height={65} />
-                            <p className="font-medium text-center">Create a new one</p>
+                      <p className="text-gray-500 text-lg font-medium">Choose what you&apos;d like to do next</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 relative z-10">
+                      {isSimplifiedEnabled ? (
+                        <>
+                          <button
+                            className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] ring-1 ring-black/5"
+                            onClick={() => {
+                              setOpen(false);
+                              router.push('/simplified');
+                            }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            
+                            <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
+                               <Image src="/create_new.png" alt="create" width={100} height={100} className="object-contain drop-shadow-md" />
+                            </div>
+                            
+                            <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">Course Selection</h3>
+                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium">Real-time search & single-page layout</p>
+                            <div className="relative z-10 mt-4 inline-flex items-center px-3 py-1 rounded-full bg-green-100/80 text-green-700 text-[10px] font-bold tracking-wider uppercase border border-green-200/50 shadow-sm">Recommended</div>
                           </button>
-                        )}
-                        <button
-                          className="flex flex-col items-center justify-start bg-[#E9D5FF] border-[#F2D8FE] border-[5px] rounded-2xl p-4 pt-5 w-56 max-w-full h-52 shadow hover:bg-purple-300 transition text-black text-center cursor-pointer"
-                          onClick={() => {
-                            if (!session) {
+
+                          <button
+                            className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)] ring-1 ring-black/5"
+                            onClick={() => {
                               setOpen(false);
-                              setShowLogin(true);
-                            } else {
-                              setOpen(false);
-                              router.push("/saved");
-                            }
-                          }}
+                              router.push('/preferences');
+                            }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            
+                            <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
+                               <Image src="/create_new.png" alt="advanced" width={100} height={100} className="object-contain hue-rotate-60 drop-shadow-md" />
+                            </div>
+                            
+                            <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">Advanced Preferences</h3>
+                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium">Classic step-by-step slot & faculty priorities</p>
+                          </button>
+                        </>
+                      ) : (
+                        <button 
+                          className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] ring-1 ring-black/5 md:col-span-2 md:col-start-2 lg:col-span-1 lg:col-start-2" 
+                          onClick={() => { setOpen(false); router.push('/preferences'); }}
                         >
-                          <Image src="/savedTimetable.png" alt="saved" width={95} height={55} unoptimized className="object-contain" />
-                          <p className="font-bold text-sm mt-2">Saved Timetables</p>
-                          <p className="text-[10px] text-gray-500 mt-1 px-1 leading-normal">
-                            {session ? "View and manage your saved timetables" : "Log in to view saved timetables"}
-                          </p>
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
+                            <Image src="/create_new.png" alt="create" width={100} height={100} className="object-contain drop-shadow-md" />
+                          </div>
+                          <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">Create a new one</h3>
                         </button>
-                      </div>
+                      )}
+                      
+                      <button
+                        className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.12)] ring-1 ring-black/5"
+                        onClick={() => {
+                          if (!session) {
+                            setOpen(false);
+                            setShowLogin(true);
+                          } else {
+                            setOpen(false);
+                            router.push("/saved");
+                          }
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
+                           <Image src="/savedTimetable.png" alt="saved" width={100} height={100} unoptimized className="object-contain drop-shadow-md" />
+                        </div>
+                        
+                        <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-purple-700 transition-colors">Saved Timetables</h3>
+                        <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium">
+                          {session ? "View and manage your saved timetables" : "Log in to view saved timetables"}
+                        </p>
+                      </button>
                     </div>
                   </div>
                 </div>

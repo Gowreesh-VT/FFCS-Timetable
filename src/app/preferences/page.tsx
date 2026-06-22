@@ -160,6 +160,12 @@ export default function PreferencesPage() {
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [selectionError, setSelectionError] = useState('');
+    const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+
+    const navigateWithLoader = (path: string, label: string) => {
+        setNavigatingTo(label);
+        setTimeout(() => router.push(path), 250);
+    };
     const [isSkippedToSubjects, setIsSkippedToSubjects] = useState(false);
     const [subjectSearchQuery, setSubjectSearchQuery] = useState('');
     const [skipToast, setSkipToast] = useState(false);
@@ -1036,6 +1042,16 @@ export default function PreferencesPage() {
 
     return (
         <>
+        {/* Navigation Loader Overlay */}
+        {navigatingTo && (
+            <div className="fixed inset-0 z-[9999] bg-[#F5E6D3]/80 backdrop-blur-sm flex flex-col items-center justify-center gap-5">
+                <div className="relative w-14 h-14">
+                    <div className="absolute inset-0 rounded-full border-4 border-[#eadcc5]/50" />
+                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500" style={{ animation: 'spin 0.8s linear infinite' }} />
+                </div>
+                <span className="text-sm font-bold text-gray-600 tracking-wide">{navigatingTo}</span>
+            </div>
+        )}
         <div className={`h-screen bg-[#F5E6D3] font-sans overflow-hidden transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <div className="h-full px-[clamp(12px,1.5vw,24px)] pt-[clamp(10px,1vh,18px)] pb-29">
                 <div className="w-full max-w-450 h-full mx-auto flex flex-col min-h-0">
@@ -1045,19 +1061,19 @@ export default function PreferencesPage() {
                         </div>
                         <div className="flex items-center gap-3 flex-wrap md:flex-nowrap justify-center md:justify-end w-full md:w-auto">
                             {isSimplifiedEnabled && (
-                                <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E2E6EA] px-3 py-2 shadow-sm border border-gray-300/40">
-                                    <span className="text-sm font-extrabold text-gray-700 whitespace-nowrap">
-                                        Course Selection Mode
+                                <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E9F3E8] px-3 py-2 shadow-sm border border-[#D4F4E6]">
+                                    <span className="text-sm font-extrabold text-green-900 whitespace-nowrap">
+                                        Simplified Mode
                                     </span>
                                     <button
                                         type="button"
                                         role="switch"
-                                        onClick={() => router.push('/simplified')}
+                                        onClick={() => navigateWithLoader('/simplified', 'Switching to Simplified Mode...')}
                                         aria-checked={false}
-                                        aria-label="Toggle course selection mode"
-                                        className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-gray-300 focus:outline-none cursor-pointer"
+                                        aria-label="Toggle simplified mode"
+                                        className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-[#A7D7C5] hover:bg-[#86cbb3] focus:outline-none cursor-pointer"
                                     >
-                                        <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white" />
+                                        <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
                                     </button>
                                 </div>
                             )}

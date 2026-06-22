@@ -212,7 +212,6 @@ export default function TimetablePage() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const { timetableData, setTimetableData } = useTimetable();
-    const isSimplifiedEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow) ?? false;
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedSlot, setSelectedSlot] = useState<timetableDisplayData | null>(null);
@@ -665,36 +664,57 @@ export default function TimetablePage() {
             {/* Toast */}
             {toast && (
                 <div 
-                    className={`fixed top-8 right-8 text-white px-8 py-4 rounded-2xl shadow-2xl text-[14px] font-bold animate-[slideIn_0.3s_ease] border border-white/10 ${toastType === 'error' ? 'bg-red-500' : 'bg-[#1a1a2e]'}`}
-                    style={{ zIndex: 100000 }}
+                    className="fixed top-8 right-8 flex items-center gap-3.5 border rounded-2xl p-4 shadow-xl pointer-events-auto max-w-md animate-[slideIn_0.3s_ease] text-white"
+                    style={{
+                        backgroundColor: toastType === 'error' ? '#e11d48' : '#059669',
+                        borderColor: toastType === 'error' ? '#be123c' : '#047857',
+                        zIndex: 99999,
+                    }}
                 >
-                    {toast}
+                    <span 
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                        style={{
+                            backgroundColor: toastType === 'error' ? '#9f1239' : '#065f46',
+                            color: '#ffffff',
+                        }}
+                    >
+                        {toastType === 'error' ? (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        ) : (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        )}
+                    </span>
+                    <p className="text-[14px] font-bold leading-tight flex-1">
+                        {toast}
+                    </p>
+                    <button 
+                        onClick={() => setToast('')}
+                        className="transition-colors ml-2 bg-none border-none p-1 cursor-pointer flex items-center justify-center"
+                        style={{
+                            color: toastType === 'error' ? '#ffe4e6' : '#d1fae5',
+                        }}
+                        aria-label="Close"
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = toastType === 'error' ? '#ffe4e6' : '#d1fae5'}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
             )}
 
             <div className="h-full px-[clamp(12px,1.5vw,24px)] pt-[clamp(10px,1vh,18px)] pb-40 md:pb-29">
                 <div className="w-full max-w-450 h-full mx-auto flex flex-col min-h-0">
-                    <div data-tour="timetable-intro" className="flex flex-row items-center justify-between gap-4 px-2 pt-4.5 pb-2 shrink-0 w-full">
-                        <div className="flex flex-col gap-1">
-                            <h1 className="text-[24px] font-bold text-black">Timetables Generated</h1>
-                        </div>
-                        {isSimplifiedEnabled && (
-                            <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E2E6EA] px-3 py-2 shadow-sm border border-gray-300/40">
-                                <span className="text-sm font-extrabold text-gray-700 whitespace-nowrap">
-                                    Course Selection Mode
-                                </span>
-                                <button
-                                    type="button"
-                                    role="switch"
-                                    onClick={() => router.push('/simplified')}
-                                    aria-checked={false}
-                                    aria-label="Toggle course selection mode"
-                                    className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-gray-300 focus:outline-none cursor-pointer"
-                                >
-                                    <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white" />
-                                </button>
-                            </div>
-                        )}
+                    <div data-tour="timetable-intro" className="flex items-center gap-4 px-2 pt-4.5 pb-2 shrink-0">
+                        <h1 className="text-[24px] font-bold text-black">Timetables Generated</h1>
                     </div>
 
                     {/* Main Table Container */}
@@ -1041,11 +1061,7 @@ export default function TimetablePage() {
             )}
 
             {showDownloadModal && (
-                <div 
-                    className="fixed inset-0 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm" 
-                    style={{ zIndex: 99999 }}
-                    onClick={() => !isDownloading && setShowDownloadModal(false)}
-                >
+                <div className="fixed inset-0 z-520 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm" onClick={() => !isDownloading && setShowDownloadModal(false)}>
                     <div
                         className="relative w-full max-w-118 animate-[scaleIn_0.2s_ease] overflow-hidden rounded-[30px] border border-[#eadcc5] bg-[#FFF8E7] p-7 shadow-[0_24px_70px_rgba(74,54,30,0.18)] sm:p-8"
                         onClick={(e) => e.stopPropagation()}
@@ -1116,11 +1132,7 @@ export default function TimetablePage() {
 
             {/* Share Modal */}
             {showShareModal && (
-                <div 
-                    className="fixed inset-0 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm" 
-                    style={{ zIndex: 99999 }}
-                    onClick={() => setShowShareModal(false)}
-                >
+                <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm" onClick={() => setShowShareModal(false)}>
                     <div
                         className="relative w-full max-w-118 animate-[scaleIn_0.2s_ease] overflow-hidden rounded-[30px] border border-[#eadcc5] bg-[#FFF8E7] p-7 shadow-[0_24px_70px_rgba(74,54,30,0.18)] sm:p-8"
                         onClick={e => e.stopPropagation()}
@@ -1214,14 +1226,10 @@ export default function TimetablePage() {
 
             {/* Save Modal */}
             {showSaveModal && (
-                <div 
-                    className="fixed inset-0 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm" 
-                    style={{ zIndex: 99999 }}
-                    onClick={() => {
-                        setSaveError('');
-                        setShowSaveModal(false);
-                    }}
-                >
+                <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm" onClick={() => {
+                    setSaveError('');
+                    setShowSaveModal(false);
+                }}>
                     <div
                         className="relative w-full max-w-118 animate-[scaleIn_0.2s_ease] overflow-hidden rounded-[30px] border border-[#eadcc5] bg-[#FFF8E7] p-7 shadow-[0_24px_70px_rgba(74,54,30,0.18)] sm:p-8"
                         onClick={e => e.stopPropagation()}
