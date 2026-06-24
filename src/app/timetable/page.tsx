@@ -230,6 +230,8 @@ export default function TimetablePage() {
     const [showLogin, setShowLogin] = useState(false);
     const [timetableTitle, setTimetableTitle] = useState('My Schedule');
     const [saveError, setSaveError] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [saveOption, setSaveOption] = useState<'update' | 'new'>('update');
     const { scheduleRows, leftTimes, rightTimes } = useMemo(() => getSlotViewPayload(), []);
 
     const hasInitialized = useRef(false);
@@ -240,6 +242,20 @@ export default function TimetablePage() {
         hasInitialized.current = true;
 
         posthog.capture('timetable_builder_loaded');
+
+        const editingId = getCookie('editingTimetableId');
+        if (editingId) {
+            setIsEditing(true);
+            axios.get(`/api/timetables/${editingId}`)
+                .then(res => {
+                    if (res.data?.title) {
+                        setTimetableTitle(res.data.title);
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load editing timetable title:', err);
+                });
+        }
 
         if (!timetableData || timetableData.length === 0) {
             const savedCoursesRaw = getPlannerStoredValue('generatedTimetableCourses') || getPlannerStoredValue('preferenceCourses');
@@ -356,7 +372,7 @@ export default function TimetablePage() {
         setSelectedSlotCategory(category);
     }, []);
 
-    const handleSave = async (customTitle?: string, options?: { skipRedirect?: boolean; makePublic?: boolean }) => {
+    const handleSave = async (customTitle?: string, options?: { skipRedirect?: boolean; makePublic?: boolean; saveAsNew?: boolean }) => {
         if (!session?.user?.email) {
             setShowLogin(true);
             showToast('Please sign in to save or share your timetable.');
@@ -377,7 +393,9 @@ export default function TimetablePage() {
                 facultyName: s.facultyName,
             }));
 
-            if (editingTimetableId) {
+            const saveAsNew = options?.saveAsNew ?? (saveOption === 'new');
+
+            if (editingTimetableId && !saveAsNew) {
                 // Update existing timetable
                 const res = await axios.patch(`/api/timetables/${editingTimetableId}`, {
                     title,
@@ -544,7 +562,7 @@ export default function TimetablePage() {
                 shareId = timetableRes.data.shareId;
             } else {
                 console.log('Saving new private timetable...');
-                const saved = await handleSave(timetableTitle, { skipRedirect: true, makePublic: true });
+                const saved = await handleSave(timetableTitle, { skipRedirect: true, makePublic: true, saveAsNew: false });
                 console.log('Save result:', saved);
                 if (saved?.shareId) {
                     shareId = saved.shareId;
@@ -1248,7 +1266,51 @@ export default function TimetablePage() {
                             </div>
                         </div>
 
-                        <div className="mb-3! rounded-2xl border border-[#eadcc5] bg-white p-2.5 shadow-[0_8px_24px_rgba(74,54,30,0.05)]">
+                        {/* Save options (Update existing or Save as copy) */}
+                        {isEditing && (
+                            <div className="mb-4! flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setSaveOption('update')}
+                                    className={`relative flex-1 p-4 rounded-2xl border text-center transition-all duration-200 cursor-pointer ${
+                                        saveOption === 'update'
+                                            ? 'border-[#A0C4FF] bg-white text-black shadow-[0_8px_20px_rgba(160,196,255,0.12)] scale-[1.02]'
+                                            : 'border-[#eadcc5] bg-[#FFF8E7]/40 text-[#6b6257] hover:bg-[#f6ead8] opacity-80 hover:opacity-100'
+                                    }`}
+                                >
+                                    {saveOption === 'update' && (
+                                        <div className="absolute top-2 right-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#A0C4FF] text-black">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <div className={`text-[14px] ${saveOption === 'update' ? 'font-extrabold text-[#1a1a1a]' : 'font-bold'}`}>Update Existing</div>
+                                    <div className="text-[11px] font-semibold opacity-75 mt-0.5">Overwrite current</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setSaveOption('new')}
+                                    className={`relative flex-1 p-4 rounded-2xl border text-center transition-all duration-200 cursor-pointer ${
+                                        saveOption === 'new'
+                                            ? 'border-[#A0C4FF] bg-white text-black shadow-[0_8px_20px_rgba(160,196,255,0.12)] scale-[1.02]'
+                                            : 'border-[#eadcc5] bg-[#FFF8E7]/40 text-[#6b6257] hover:bg-[#f6ead8] opacity-80 hover:opacity-100'
+                                    }`}
+                                >
+                                    {saveOption === 'new' && (
+                                        <div className="absolute top-2 right-2 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#A0C4FF] text-black">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <div className={`text-[14px] ${saveOption === 'new' ? 'font-extrabold text-[#1a1a1a]' : 'font-bold'}`}>Save as Copy</div>
+                                    <div className="text-[11px] font-semibold opacity-75 mt-0.5">Create new record</div>
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="mb-4! rounded-2xl border border-[#eadcc5] bg-white px-5 py-4 shadow-[0_4px_16px_rgba(74,54,30,0.02)] focus-within:border-[#A0C4FF] focus-within:ring-2 focus-within:ring-[#A0C4FF]/30 transition-all">
                             <input
                                 type="text"
                                 value={timetableTitle}
@@ -1258,7 +1320,7 @@ export default function TimetablePage() {
                                         setSaveError('');
                                     }
                                 }}
-                                className="w-full rounded-xl bg-[#F8E8D2]/45 px-4 py-3.5 text-[16px] font-semibold text-black outline-none transition-all placeholder:font-medium placeholder:text-[#8a8177] focus:ring-2 focus:ring-[#A0C4FF]/45"
+                                className="w-full bg-transparent text-[16px] font-semibold text-black outline-none border-none p-0 focus:ring-0 focus:outline-none placeholder:font-medium placeholder:text-[#8a8177]"
                                 placeholder="Enter a title..."
                                 autoFocus
                             />
@@ -1280,12 +1342,12 @@ export default function TimetablePage() {
                             </button>
                             <button
                                 onClick={() => {
-                                    handleSave(timetableTitle);
+                                    handleSave(timetableTitle, { saveAsNew: saveOption === 'new' });
                                 }}
                                 disabled={isSaving || !timetableTitle.trim()}
                                 className="min-h-13 rounded-2xl bg-[#A0C4FF] px-6 py-3.5 text-center text-[16px] font-black text-black shadow-[0_8px_20px_rgba(160,196,255,0.32)] transition-all hover:bg-[#8eb1ef] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A0C4FF]/70 active:scale-[0.98] disabled:opacity-50"
                             >
-                                Save
+                                {isSaving ? 'Saving...' : (isEditing && saveOption === 'update' ? 'Update' : (isEditing ? 'Save Copy' : 'Save'))}
                             </button>
                         </div>
                     </div>

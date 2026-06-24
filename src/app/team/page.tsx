@@ -4,6 +4,7 @@ import Image from "next/image";
 import LoginModal from "../../components/loginPopup";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import { clearPlannerClientCache } from "@/lib/clientCache";
 import { parseName } from "@/lib/utils";
 
@@ -153,6 +154,16 @@ const TEAM_MEMBERS: TeamMember[] = [
     photo: "https://h8z6stjynz.ufs.sh/f/nEev6VX4XfKEWcJRaQxWChfmZ1kq57BVItpdrGLNHsS8TugD",
     github: "https://github.com/AkashVishnu-P",
     linkedin: "https://www.linkedin.com/in/akashvishnu-p/"
+  },
+  {
+    name: "Udarsh Goyal",
+    role: "Developer",
+    category: "frontend",
+    tagline: "Built the simplified version page of the planner.",
+    gradient: "from-[#FFD8A8] to-[#E8590C]",
+    photo: "https://h8z6stjynz.ufs.sh/f/dummy_udarsh",
+    github: "https://github.com/udarshcode",
+    linkedin: "https://www.linkedin.com/in/udarsh-goyal-256095383/"
   }
 ];
 
@@ -612,8 +623,17 @@ export default function TeamPage() {
               })}
             </div>
 
-            <div className="f-block f-credits">
-              Built with ❤️ by Microsoft Innovations Club
+            <div className="f-block f-credits flex flex-col justify-center items-center gap-1 py-2">
+              <span>Built with ❤️ by Microsoft Innovations Club</span>
+              <div className="flex gap-4">
+                <Link href="/privacy" className="text-xs text-[#3B5BDB] hover:underline font-bold tracking-widest uppercase">
+                  Privacy Policy
+                </Link>
+                <span className="text-gray-300">|</span>
+                <Link href="/terms" className="text-xs text-[#3B5BDB] hover:underline font-bold tracking-widest uppercase">
+                  Terms of Service
+                </Link>
+              </div>
             </div>
 
             <div className="f-block f-updates" style={{ padding: '8px' }}>
