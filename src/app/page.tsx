@@ -354,7 +354,7 @@ export default function LandingPage() {
                       <h2 className="text-3xl sm:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 tracking-tight mb-3">
                         Welcome {session?.user?.name ? `back, ${session.user.name}` : "to FFCS"}!
                       </h2>
-                      <p className="text-gray-500 text-lg font-medium">Choose what you&apos;d like to do next</p>
+                      <p className="text-gray-500 text-lg font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Choose what you&apos;d like to do next</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 relative z-10">
@@ -374,7 +374,7 @@ export default function LandingPage() {
                             </div>
                             
                             <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">Course Selection</h3>
-                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium">Real-time search & single-page layout</p>
+                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Real-time search & single-page layout</p>
                             <div className="relative z-10 mt-4 inline-flex items-center px-3 py-1 rounded-full bg-green-100/80 text-green-700 text-[10px] font-bold tracking-wider uppercase border border-green-200/50 shadow-sm">Recommended</div>
                           </button>
 
@@ -392,7 +392,7 @@ export default function LandingPage() {
                             </div>
                             
                             <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">Advanced Preferences</h3>
-                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium">Classic step-by-step slot & faculty priorities</p>
+                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Classic step-by-step slot & faculty priorities</p>
                           </button>
                         </>
                       ) : (
@@ -427,7 +427,7 @@ export default function LandingPage() {
                         </div>
                         
                         <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-purple-700 transition-colors">Saved Timetables</h3>
-                        <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium">
+                        <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>
                           {session ? "View and manage your saved timetables" : "Log in to view saved timetables"}
                         </p>
                       </button>
@@ -666,8 +666,17 @@ export default function LandingPage() {
               })}
             </div>
 
-            <div className="f-block f-credits">
-              Built with ❤️ by Microsoft Innovations Club
+            <div className="f-block f-credits flex flex-col justify-center items-center gap-1 py-2">
+              <span>Built with ❤️ by Microsoft Innovations Club</span>
+              <div className="flex gap-4">
+                <Link href="/privacy" className="text-xs text-[#3B5BDB] hover:underline font-bold tracking-widest uppercase">
+                  Privacy Policy
+                </Link>
+                <span className="text-gray-300">|</span>
+                <Link href="/terms" className="text-xs text-[#3B5BDB] hover:underline font-bold tracking-widest uppercase">
+                  Terms of Service
+                </Link>
+              </div>
             </div>
 
             <div className="f-block f-updates" style={{ padding: '8px' }}>

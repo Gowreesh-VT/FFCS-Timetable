@@ -1160,7 +1160,8 @@ export default function PreferencesPage() {
                                             </h2>
                                         </div>
 
-                                        <div className="flex-1 bg-transparent p-1 lg:p-3 overflow-y-auto custom-scrollbar flex flex-col">
+                                        <div className="flex-1 bg-transparent overflow-y-auto custom-scrollbar flex flex-col">
+                                            <div className="p-1 lg:p-3 flex-1 flex flex-col">
                                             {selectionError && (
                                                 <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                                                     {selectionError}
@@ -1241,7 +1242,7 @@ export default function PreferencesPage() {
                                                                         showSkipToast();
                                                                     }
                                                                 }}
-                                                                className={`shrink-0 flex items-center gap-1.5 px-3 h-9 rounded-lg border font-semibold text-xs transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5BDB] cursor-pointer whitespace-nowrap ${
+                                                                className={`shrink-0 flex items-center justify-center gap-1.5 px-2 h-9 w-[165px] rounded-lg border font-semibold text-xs transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5BDB] cursor-pointer whitespace-nowrap ${
                                                                     isSkippedToSubjects
                                                                         ? 'bg-[#3B5BDB] border-[#3B5BDB] text-white shadow-md shadow-[#3B5BDB]/30'
                                                                         : 'bg-white border-gray-300 text-gray-600 hover:border-[#3B5BDB] hover:text-[#3B5BDB] hover:shadow-sm active:scale-95'
@@ -1388,10 +1389,11 @@ export default function PreferencesPage() {
                                                         )}
                                                     </div>
                                                 </div>
-                                            )}
+                                             )}
 
 
-                                        </div>
+                                            </div>
+                                         </div>
 
                                         {/* Navigation arrows within active panel */}
                                          <div className="flex justify-between mt-auto pt-3 shrink-0 px-1 pb-1">
@@ -1740,48 +1742,56 @@ export default function PreferencesPage() {
 
             {/* Show-all-subjects toast */}
             {skipToast && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        bottom: '32px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 99999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        padding: '16px 24px',
-                        borderRadius: '16px',
-                        background: 'linear-gradient(135deg, #3B5BDB 0%, #5C7CFA 100%)',
-                        boxShadow: '0 20px 40px rgba(59,91,219,0.35)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        color: '#fff',
-                        minWidth: '300px',
-                        maxWidth: '90vw',
-                        pointerEvents: 'none',
-                        animation: 'skipToastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
-                        fontFamily: 'Inter, system-ui, sans-serif',
-                    }}
-                >
-                    <div style={{
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.2)',
-                    }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12"/>
-                        </svg>
+                <>
+                    <style>{`
+                        @keyframes skipToastIn {
+                            from { opacity: 0; transform: translateY(12px); }
+                            to   { opacity: 1; transform: translateY(0); }
+                        }
+                    `}</style>
+                    <div
+                        style={{
+                            position: 'fixed',
+                            bottom: '24px',
+                            right: '24px',
+                            zIndex: 99999,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
+                            padding: '14px 20px',
+                            borderRadius: '16px',
+                            backgroundColor: '#ffffff',
+                            boxShadow: '0 12px 30px rgba(74, 54, 30, 0.08), 0 4px 12px rgba(74, 54, 30, 0.04)',
+                            border: '1.5px solid #eadcc5',
+                            color: '#2b2520',
+                            minWidth: '320px',
+                            maxWidth: 'calc(100vw - 48px)',
+                            pointerEvents: 'none',
+                            animation: 'skipToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                            fontFamily: 'Inter, system-ui, sans-serif',
+                        }}
+                    >
+                        <span style={{
+                            display: 'flex',
+                            height: '24px',
+                            width: '24px',
+                            flexShrink: 0,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(59, 91, 219, 0.1)',
+                            color: '#3B5BDB'
+                        }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 700, lineHeight: '1.3', color: '#2b2520' }}>Showing all subjects</span>
+                            <span style={{ fontSize: '11.5px', fontWeight: 500, color: '#7c7267' }}>School filter removed</span>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span style={{ fontSize: '15px', fontWeight: 700, lineHeight: 1.2 }}>Showing all subjects</span>
-                        <span style={{ fontSize: '13px', fontWeight: 400, opacity: 0.8 }}>School filter removed — browsing everything</span>
-                    </div>
-                </div>
+                </>
             )}
 
             <style jsx>{`

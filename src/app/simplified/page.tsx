@@ -1261,7 +1261,7 @@ export default function CourseSelectionPage() {
                 <div className="flex items-center gap-4">
                     <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#D4F4E6] px-3 py-2 shadow-sm border border-emerald-300/30">
                         <span className="text-sm font-extrabold text-green-800 whitespace-nowrap">
-                            Advanced Mode
+                            Simplified Mode
                         </span>
                         <button
                             type="button"

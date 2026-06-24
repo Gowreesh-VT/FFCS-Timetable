@@ -1,6 +1,7 @@
 import React from "react";
 import "./mobile.css";
 import Image from "next/image";
+import Link from "next/link";
 export default function MobilePage() {
     return (
       <div className="flex flex-col min-h-[100dvh] bg-white font-sans text-black overflow-hidden items-center justify-between">
@@ -43,13 +44,25 @@ export default function MobilePage() {
         </div>
 
         {/* Footer Area */}
-        <div className="w-full bg-[#FAFAFA] pt-5 pb-5 flex flex-col items-center justify-center text-[16px] border-t border-gray-100 shadow-[0_-20px_40px_rgba(0,0,0,0.015)]">
-          <p className="mb-0 text-black font-[400]">
-            Built with <span className="text-[#FF3B30]">❤️</span> by
+        <div className="w-full bg-[#FAFAFA] pt-4 pb-4 flex flex-col items-center justify-center text-[15px] border-t border-gray-100 shadow-[0_-20px_40px_rgba(0,0,0,0.015)] gap-1">
+          <p className="mb-0 text-black font-[400] text-center">
+            Built with <span className="text-[#FF3B30]">❤️</span> by Microsoft Innovations Club
           </p>
-          <p className="mb-0 text-black font-[400]">
-            Microsoft Innovations Club
-          </p>
+          <div className="flex gap-4">
+            <Link 
+              href="/privacy" 
+              className="text-xs text-[#3b5bdb] hover:underline font-bold tracking-widest uppercase"
+            >
+              Privacy Policy
+            </Link>
+            <span className="text-gray-300">|</span>
+            <Link 
+              href="/terms" 
+              className="text-xs text-[#3b5bdb] hover:underline font-bold tracking-widest uppercase"
+            >
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     );
