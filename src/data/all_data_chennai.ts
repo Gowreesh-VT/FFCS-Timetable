@@ -19814,7 +19814,7 @@ const data = [
     "TYPE": "TH",
     "CREDITS": 4,
     "VENUE": "AB2-605",
-    "SLOT": "B1+TB1+TB",
+    "SLOT": "B1+TB1+TBB1",
     "FACULTY": "MAHARISHI R"
   },
   {
@@ -19895,7 +19895,7 @@ const data = [
     "TYPE": "TH",
     "CREDITS": 4,
     "VENUE": "AB2-608",
-    "SLOT": "B1+TB1+TB",
+    "SLOT": "B1+TB1+TBB1",
     "FACULTY": "SATHIS KUMAR G"
   },
   {
@@ -19967,7 +19967,7 @@ const data = [
     "TYPE": "TH",
     "CREDITS": 4,
     "VENUE": "AB2-702",
-    "SLOT": "B1+TB1+TB",
+    "SLOT": "B1+TB1+TBB1",
     "FACULTY": "BHAVANI J"
   },
   {
