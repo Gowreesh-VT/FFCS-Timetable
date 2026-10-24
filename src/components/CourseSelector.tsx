@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useFeatureFlagEnabled } from '@posthog/react';
-import { FEATURE_FLAGS } from '@/lib/featureFlags';
 import { fullCourseData } from '@/lib/type';
 import { getChennaiCourseType } from '@/lib/chennaiCatalog';
 import chennaiCourses from '@/data/all_data_chennai';
@@ -21,23 +19,6 @@ interface CourseSelectorProps {
     scheme: string;
     onCourseSelect: (course: fullCourseData) => void;
     selectedCourses: fullCourseData[];
-}
-
-function parseChennaiCoursesLegacy(courses: typeof chennaiCourses): CourseCatalog {
-    const chennaiCategoryData: CourseCatalog = {};
-    courses.forEach((record) => {
-        const category = record.TYPE || 'UNKNOWN';
-        const courseKey = `${record.CODE} - ${record.TITLE}`;
-
-        chennaiCategoryData[category] ||= {};
-        chennaiCategoryData[category][courseKey] ||= [];
-        chennaiCategoryData[category][courseKey].push({
-            slot: record.SLOT,
-            faculty: record.FACULTY,
-            venue: (record as any).VENUE || 'TBD',
-        });
-    });
-    return chennaiCategoryData;
 }
 
 function parseChennaiCoursesNew(courses: typeof chennaiCourses): CourseCatalog {
@@ -70,8 +51,6 @@ export default function CourseSelector({
     onCourseSelect,
     selectedCourses,
 }: CourseSelectorProps) {
-    const isNewParserEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.useNewCourseParser) ?? false;
-
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
     const [schemeData, categories, courses] = useMemo(() => {
@@ -79,9 +58,7 @@ export default function CourseSelector({
             return [{} as CourseCatalog, [] as string[], {} as Record<string, CourseOption[]>];
         }
 
-        const chennaiCategoryData = isNewParserEnabled
-            ? parseChennaiCoursesNew(chennaiCourses)
-            : parseChennaiCoursesLegacy(chennaiCourses);
+        const chennaiCategoryData = parseChennaiCoursesNew(chennaiCourses);
 
         const chennaiCategories = Object.keys(chennaiCategoryData);
         const chennaiAllCourses: Record<string, CourseOption[]> = {};
@@ -91,7 +68,7 @@ export default function CourseSelector({
         });
 
         return [chennaiCategoryData, chennaiCategories, chennaiAllCourses];
-    }, [scheme, isNewParserEnabled]);
+    }, [scheme]);
 
     const filteredCourses = useMemo(() => {
         let filtered = Object.entries(courses);

@@ -1,7 +1,5 @@
 'use client';
 
-import { useFeatureFlagEnabled } from '@posthog/react';
-import { FEATURE_FLAGS } from '@/lib/featureFlags';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';

@@ -33,10 +33,6 @@ export default function PlannerOnboardingTour() {
     const router = useRouter();
     const pathname = usePathname();
     const { status: authStatus } = useSession();
-    const isEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.plannerOnboardingTour) ?? false;
-
-    const isSchoolSelectionEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.schoolSelectionStep) ?? false;
-    const isDirectJumpEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.directJumpToCourses) ?? false;
 
     const [run, setRun] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
@@ -57,17 +53,11 @@ export default function PlannerOnboardingTour() {
     }, []);
 
     const steps = useMemo<PlannerTourStep[]>(() => {
-        if (!isSchoolSelectionEnabled) {
-            return plannerTourSteps;
-        }
-
         const schoolStep: PlannerTourStep = {
             route: '/preferences',
             target: '[data-tour="preferences-step-school"]',
             title: 'Select School',
-            content: isDirectJumpEnabled
-                ? 'Select your school (e.g. SCOPE, SENSE) to filter courses by department, or use the "Skip & Search All Subjects" button to view the entire catalog directly.'
-                : 'Select your academic school to view and filter courses related to your department.',
+            content: 'Select your school (e.g. SCOPE, SENSE) to filter courses by department, or use the "Skip & Search All Subjects" button to view the entire catalog directly.',
             placement: 'right',
             preferenceStep: 0,
             before: () => setPreferenceStep(0),
@@ -76,7 +66,7 @@ export default function PlannerOnboardingTour() {
         const newSteps = [...plannerTourSteps];
         newSteps.splice(1, 0, schoolStep);
         return newSteps;
-    }, [isSchoolSelectionEnabled, isDirectJumpEnabled]);
+    }, []);
     const currentStep = steps[stepIndex];
     const isStepAllowed = useCallback((step: PlannerTourStep) => {
         if (!step.auth) return true;
@@ -154,7 +144,7 @@ export default function PlannerOnboardingTour() {
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
-            if (!isEnabled || authStatus === 'loading') {
+            if (authStatus === 'loading') {
                 setRun(false);
                 setIsComplete(true);
                 return;
@@ -207,10 +197,10 @@ export default function PlannerOnboardingTour() {
         }, 250);
 
         return () => window.clearTimeout(timer);
-    }, [authStatus, findAllowedStepIndex, finishTour, isEnabled, pathname, persistActiveStep, router, serverCompletion, steps, isCourseUpdateAlertEnabled, alertDismissed]);
+    }, [authStatus, findAllowedStepIndex, finishTour, pathname, persistActiveStep, router, serverCompletion, steps, isCourseUpdateAlertEnabled, alertDismissed]);
 
     useEffect(() => {
-        if (!isEnabled || authStatus !== 'authenticated') {
+        if (authStatus !== 'authenticated') {
             setServerCompletion(null);
             return;
         }
@@ -258,7 +248,7 @@ export default function PlannerOnboardingTour() {
         return () => {
             cancelled = true;
         };
-    }, [authStatus, isEnabled]);
+    }, [authStatus]);
 
     const handleJoyrideEvent = useCallback((data: EventData) => {
         const { action, index, status, type } = data;
@@ -276,7 +266,7 @@ export default function PlannerOnboardingTour() {
         moveToStep(index + direction);
     }, [finishTour, moveToStep]);
 
-    if (!isEnabled || isComplete || !currentStep || currentStep.route !== pathname) {
+    if (isComplete || !currentStep || currentStep.route !== pathname) {
         return null;
     }
 

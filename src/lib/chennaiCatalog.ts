@@ -1,7 +1,6 @@
 import chennaiCourses from '@/data/all_data_chennai';
 import type { fullCourseData } from '@/lib/type';
-import { findMatchingLabSlot, pairTheoryAndLabSlots } from './slots';
-import { isSessionBasedSlotPairingEnabled } from './featureFlags';
+import { pairTheoryAndLabSlots } from './slots';
 
 export type ChennaiCourseRecord = (typeof chennaiCourses)[number];
 
@@ -163,15 +162,13 @@ export function buildPreferenceCoursesFromChennaiSelection(
             let hasAutoPairedLab = false;
 
             const facultyPairings = new Map<string, Map<string, string>>();
-            if (isSessionBasedSlotPairingEnabled()) {
-                const faculties = new Set<string>();
-                subjectRecords.forEach(r => faculties.add(r.FACULTY));
-                faculties.forEach(facultyName => {
-                    const theorySlots = subjectRecords.filter(r => r.FACULTY === facultyName && isTheoryType(r.TYPE)).map(r => r.SLOT);
-                    const labSlots = subjectRecords.filter(r => r.FACULTY === facultyName && isLabType(r.TYPE)).map(r => r.SLOT);
-                    facultyPairings.set(facultyName, pairTheoryAndLabSlots(theorySlots, labSlots));
-                });
-            }
+            const faculties = new Set<string>();
+            subjectRecords.forEach(r => faculties.add(r.FACULTY));
+            faculties.forEach(facultyName => {
+                const theorySlots = subjectRecords.filter(r => r.FACULTY === facultyName && isTheoryType(r.TYPE)).map(r => r.SLOT);
+                const labSlots = subjectRecords.filter(r => r.FACULTY === facultyName && isLabType(r.TYPE)).map(r => r.SLOT);
+                facultyPairings.set(facultyName, pairTheoryAndLabSlots(theorySlots, labSlots));
+            });
 
             const courseSlots = Array.from(slotFacultyMap.entries()).map(([slotName, facultiesSet]) => {
                 // Find the actual TYPE for this slot from the records
@@ -199,20 +196,12 @@ export function buildPreferenceCoursesFromChennaiSelection(
                             r => r.FACULTY === facultyName && isLabType(r.TYPE)
                         );
 
-                        if (isSessionBasedSlotPairingEnabled()) {
-                            if (labRecords.length > 0) {
-                                const matched = facultyPairings.get(facultyName)?.get(slotName);
-                                if (matched) {
-                                    facultyLabSlot = matched;
-                                    const matchingLabRecord = labRecords.find(r => r.SLOT === matched);
-                                    venueLab = (matchingLabRecord as any)?.VENUE;
-                                    hasAutoPairedLab = true;
-                                }
-                            }
-                        } else {
-                            if (labRecords.length === 1) {
-                                facultyLabSlot = labRecords[0].SLOT;
-                                venueLab = (labRecords[0] as any).VENUE;
+                        if (labRecords.length > 0) {
+                            const matched = facultyPairings.get(facultyName)?.get(slotName);
+                            if (matched) {
+                                facultyLabSlot = matched;
+                                const matchingLabRecord = labRecords.find(r => r.SLOT === matched);
+                                venueLab = (matchingLabRecord as any)?.VENUE;
                                 hasAutoPairedLab = true;
                             }
                         }

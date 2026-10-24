@@ -33,8 +33,8 @@ import posthog from 'posthog-js';
 import { usePreferences } from '@/lib/PreferencesContext';
 import { fullCourseData } from '@/lib/type';
 import { getPlannerStoredValue, setPlannerStoredValue } from '@/lib/plannerStorage';
-import { FEATURE_FLAGS, isSessionBasedSlotPairingEnabled } from '@/lib/featureFlags';
-import { findMatchingLabSlot, pairTheoryAndLabSlots } from '@/lib/slots';
+import { FEATURE_FLAGS } from '@/lib/featureFlags';
+import { pairTheoryAndLabSlots } from '@/lib/slots';
 import ModeHelpDialog from '@/components/ModeHelpDialog';
 import { PREFERENCE_TOUR_STEP_EVENT } from '@/components/plannerTourSteps';
 import type { ChennaiDomainCatalog } from '@/lib/chennaiCatalog';
@@ -115,15 +115,6 @@ export default function PreferencesPage() {
         setIsMounted(true);
     }, []);
 
-    const isFacultyFirstToggleAvailableRaw = useFeatureFlagEnabled(FEATURE_FLAGS.facultyFirstPreferenceFlow) ?? false;
-    const isSchoolSelectionEnabledRaw = useFeatureFlagEnabled(FEATURE_FLAGS.schoolSelectionStep) ?? false;
-    const isDirectJumpEnabledRaw = useFeatureFlagEnabled(FEATURE_FLAGS.directJumpToCourses) ?? false;
-    const isSimplifiedEnabledRaw = useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow) ?? false;
-
-    const isFacultyFirstToggleAvailable = isMounted && isFacultyFirstToggleAvailableRaw;
-    const isSchoolSelectionEnabled = isMounted && isSchoolSelectionEnabledRaw;
-    const isDirectJumpEnabled = isMounted && isDirectJumpEnabledRaw;
-    const isSimplifiedEnabled = isMounted && isSimplifiedEnabledRaw;
 
     const itemRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -175,7 +166,7 @@ export default function PreferencesPage() {
         setSkipToast(true);
         skipToastTimer.current = setTimeout(() => setSkipToast(false), 3000);
     };
-    const isFacultyFirstMode = isFacultyFirstToggleAvailable && isFacultyFirstModeEnabled;
+    const isFacultyFirstMode = isFacultyFirstModeEnabled;
     const [pairingToast, setPairingToast] = useState<{
         title: string;
         description: string;
@@ -209,9 +200,7 @@ export default function PreferencesPage() {
 
     const stepKeys = useMemo(() => {
         const keys = [];
-        if (isSchoolSelectionEnabled) {
-            keys.push('school');
-        }
+        keys.push('school');
         keys.push('domain');
         keys.push('subject');
         if (isFacultyFirstMode) {
@@ -223,7 +212,7 @@ export default function PreferencesPage() {
         }
         keys.push('priority');
         return keys;
-    }, [isSchoolSelectionEnabled, isFacultyFirstMode]);
+    }, [isFacultyFirstMode]);
 
     const stepLabels = useMemo(() => {
         return stepKeys.map(key => {
@@ -344,15 +333,15 @@ export default function PreferencesPage() {
     useEffect(() => {
         const handleTourStep = (event: Event) => {
             const step = (event as CustomEvent<{ step?: number }>).detail?.step;
-            if (typeof step === 'number' && step >= (isSchoolSelectionEnabled ? 0 : 1) && step <= 5) {
-                const adjustedStep = isSchoolSelectionEnabled ? step + 1 : step;
+            if (typeof step === 'number' && step >= 0 && step <= 5) {
+                const adjustedStep = step + 1;
                 setCurrentStep(adjustedStep);
             }
         };
 
         window.addEventListener(PREFERENCE_TOUR_STEP_EVENT, handleTourStep);
         return () => window.removeEventListener(PREFERENCE_TOUR_STEP_EVENT, handleTourStep);
-    }, [isSchoolSelectionEnabled]);
+    }, []);
 
 
 
@@ -364,12 +353,12 @@ export default function PreferencesPage() {
     // Get available domains (course prefixes)
     const domains = useMemo(() => {
         const allDomains = Object.keys(getChennaiDepartmentData([]));
-        if (isSchoolSelectionEnabled && selectedSchool) {
+        if (selectedSchool) {
             const allowedDomains = SCHOOL_TO_DOMAINS[selectedSchool] || [];
             return allDomains.filter((domain) => allowedDomains.includes(domain));
         }
         return allDomains;
-    }, [isSchoolSelectionEnabled, selectedSchool]);
+    }, [selectedSchool]);
 
     // Get subjects in selected domain
     const subjects = useMemo(() => {
@@ -695,68 +684,42 @@ export default function PreferencesPage() {
                         );
                         if (theoryIdx !== -1) {
                             const theoryCourse = mergedExistingCourses[theoryIdx];
-                            if (isSessionBasedSlotPairingEnabled()) {
-                                const facultyPairings = new Map<string, Map<string, string>>();
-                                const faculties = new Set<string>();
-                                theoryCourse.courseSlots.forEach(cs => cs.slotFaculties.forEach(f => faculties.add(f.facultyName)));
-                                newCourse.courseSlots.forEach(ls => ls.slotFaculties.forEach(f => faculties.add(f.facultyName)));
-                                
-                                faculties.forEach(facultyName => {
-                                    const theorySlotsForFaculty = theoryCourse.courseSlots
-                                        .filter(cs => cs.slotFaculties.some(f => f.facultyName === facultyName))
-                                        .map(cs => cs.slotName);
-                                    const labSlotsForFaculty = newCourse.courseSlots
-                                        .filter(ls => ls.slotFaculties.some(f => f.facultyName === facultyName))
-                                        .map(ls => ls.slotName);
-                                    facultyPairings.set(facultyName, pairTheoryAndLabSlots(theorySlotsForFaculty, labSlotsForFaculty));
-                                });
+                            const facultyPairings = new Map<string, Map<string, string>>();
+                            const faculties = new Set<string>();
+                            theoryCourse.courseSlots.forEach(cs => cs.slotFaculties.forEach(f => faculties.add(f.facultyName)));
+                            newCourse.courseSlots.forEach(ls => ls.slotFaculties.forEach(f => faculties.add(f.facultyName)));
+                            
+                            faculties.forEach(facultyName => {
+                                const theorySlotsForFaculty = theoryCourse.courseSlots
+                                    .filter(cs => cs.slotFaculties.some(f => f.facultyName === facultyName))
+                                    .map(cs => cs.slotName);
+                                const labSlotsForFaculty = newCourse.courseSlots
+                                    .filter(ls => ls.slotFaculties.some(f => f.facultyName === facultyName))
+                                    .map(ls => ls.slotName);
+                                facultyPairings.set(facultyName, pairTheoryAndLabSlots(theorySlotsForFaculty, labSlotsForFaculty));
+                            });
 
-                                const mergedCourse: fullCourseData = {
-                                    ...theoryCourse,
-                                    courseType: 'both',
-                                    courseCodeLab: newCourse.courseCode,
-                                    courseNameLab: newCourse.courseName,
-                                    courseSlots: theoryCourse.courseSlots.map(cs => ({
-                                        ...cs,
-                                        slotFaculties: cs.slotFaculties.map(f => {
-                                            const matched = facultyPairings.get(f.facultyName)?.get(cs.slotName);
-                                            return matched ? { ...f, facultyLabSlot: matched } : f;
-                                        }),
-                                    })),
-                                };
-                                changedCourses.push(mergedCourse);
-                                mergedExistingCourses = [
-                                    ...mergedExistingCourses.slice(0, theoryIdx),
-                                    mergedCourse,
-                                    ...mergedExistingCourses.slice(theoryIdx + 1),
-                                ];
-                                updateCourse(theoryCourse.courseCode, mergedCourse);
-                                continue;
-                            } else {
-                                const labSlot = newCourse.courseSlots[0];
-                                if (labSlot) {
-                                    const mergedCourse: fullCourseData = {
-                                        ...theoryCourse,
-                                        courseType: 'both',
-                                        courseCodeLab: newCourse.courseCode,
-                                        courseNameLab: newCourse.courseName,
-                                        courseSlots: theoryCourse.courseSlots.map(cs => ({
-                                            ...cs,
-                                            slotFaculties: cs.slotFaculties.map(f => {
-                                                const match = labSlot.slotFaculties.find(lf => lf.facultyName === f.facultyName);
-                                                return match ? { ...f, facultyLabSlot: labSlot.slotName } : f;
-                                            }),
-                                        })),
-                                    };
-                                    mergedExistingCourses = [
-                                        ...mergedExistingCourses.slice(0, theoryIdx),
-                                        mergedCourse,
-                                        ...mergedExistingCourses.slice(theoryIdx + 1),
-                                    ];
-                                    updateCourse(theoryCourse.courseCode, mergedCourse);
-                                    continue; // Skip adding lab as separate entry
-                                }
-                            }
+                            const mergedCourse: fullCourseData = {
+                                ...theoryCourse,
+                                courseType: 'both',
+                                courseCodeLab: newCourse.courseCode,
+                                courseNameLab: newCourse.courseName,
+                                courseSlots: theoryCourse.courseSlots.map(cs => ({
+                                    ...cs,
+                                    slotFaculties: cs.slotFaculties.map(f => {
+                                        const matched = facultyPairings.get(f.facultyName)?.get(cs.slotName);
+                                        return matched ? { ...f, facultyLabSlot: matched } : f;
+                                    }),
+                                })),
+                            };
+                            changedCourses.push(mergedCourse);
+                            mergedExistingCourses = [
+                                ...mergedExistingCourses.slice(0, theoryIdx),
+                                mergedCourse,
+                                ...mergedExistingCourses.slice(theoryIdx + 1),
+                            ];
+                            updateCourse(theoryCourse.courseCode, mergedCourse);
+                            continue;
                         }
                     } else if (newCourse.courseType === 'th') {
                         const labIdx = mergedExistingCourses.findIndex(
@@ -764,66 +727,41 @@ export default function PreferencesPage() {
                         );
                         if (labIdx !== -1) {
                             const labCourse = mergedExistingCourses[labIdx];
-                            if (isSessionBasedSlotPairingEnabled()) {
-                                const facultyPairings = new Map<string, Map<string, string>>();
-                                const faculties = new Set<string>();
-                                newCourse.courseSlots.forEach(cs => cs.slotFaculties.forEach(f => faculties.add(f.facultyName)));
-                                labCourse.courseSlots.forEach(ls => ls.slotFaculties.forEach(f => faculties.add(f.facultyName)));
-                                
-                                faculties.forEach(facultyName => {
-                                    const theorySlotsForFaculty = newCourse.courseSlots
-                                        .filter(cs => cs.slotFaculties.some(f => f.facultyName === facultyName))
-                                        .map(cs => cs.slotName);
-                                    const labSlotsForFaculty = labCourse.courseSlots
-                                        .filter(ls => ls.slotFaculties.some(f => f.facultyName === facultyName))
-                                        .map(ls => ls.slotName);
-                                    facultyPairings.set(facultyName, pairTheoryAndLabSlots(theorySlotsForFaculty, labSlotsForFaculty));
-                                });
+                            const facultyPairings = new Map<string, Map<string, string>>();
+                            const faculties = new Set<string>();
+                            newCourse.courseSlots.forEach(cs => cs.slotFaculties.forEach(f => faculties.add(f.facultyName)));
+                            labCourse.courseSlots.forEach(ls => ls.slotFaculties.forEach(f => faculties.add(f.facultyName)));
+                            
+                            faculties.forEach(facultyName => {
+                                const theorySlotsForFaculty = newCourse.courseSlots
+                                    .filter(cs => cs.slotFaculties.some(f => f.facultyName === facultyName))
+                                    .map(cs => cs.slotName);
+                                const labSlotsForFaculty = labCourse.courseSlots
+                                    .filter(ls => ls.slotFaculties.some(f => f.facultyName === facultyName))
+                                    .map(ls => ls.slotName);
+                                facultyPairings.set(facultyName, pairTheoryAndLabSlots(theorySlotsForFaculty, labSlotsForFaculty));
+                            });
 
-                                const mergedCourse: fullCourseData = {
-                                    ...newCourse,
-                                    courseType: 'both',
-                                    courseCodeLab: labCourse.courseCode,
-                                    courseNameLab: labCourse.courseName,
-                                    courseSlots: newCourse.courseSlots.map(cs => ({
-                                        ...cs,
-                                        slotFaculties: cs.slotFaculties.map(f => {
-                                            const matched = facultyPairings.get(f.facultyName)?.get(cs.slotName);
-                                            return matched ? { ...f, facultyLabSlot: matched } : f;
-                                        }),
-                                    })),
-                                };
-                                changedCourses.push(mergedCourse);
-                                // Remove old lab entry, add merged theory entry
-                                mergedExistingCourses = mergedExistingCourses.filter((_, i) => i !== labIdx);
-                                mergedExistingCourses.push(mergedCourse);
-                                addCourse(mergedCourse);
-                                updateCourse(labCourse.courseCode, mergedCourse);
-                                continue;
-                            } else {
-                                const labSlot = labCourse.courseSlots[0];
-                                if (labSlot) {
-                                    const mergedCourse: fullCourseData = {
-                                        ...newCourse,
-                                        courseType: 'both',
-                                        courseCodeLab: labCourse.courseCode,
-                                        courseNameLab: labCourse.courseName,
-                                        courseSlots: newCourse.courseSlots.map(cs => ({
-                                            ...cs,
-                                            slotFaculties: cs.slotFaculties.map(f => {
-                                                const match = labSlot.slotFaculties.find(lf => lf.facultyName === f.facultyName);
-                                                return match ? { ...f, facultyLabSlot: labSlot.slotName } : f;
-                                            }),
-                                        })),
-                                    };
-                                    // Remove old lab entry, add merged theory entry
-                                    mergedExistingCourses = mergedExistingCourses.filter((_, i) => i !== labIdx);
-                                    mergedExistingCourses.push(mergedCourse);
-                                    addCourse(mergedCourse); // context: add merged (lab entry will be removed next)
-                                    updateCourse(labCourse.courseCode, mergedCourse);
-                                    continue;
-                                }
-                            }
+                            const mergedCourse: fullCourseData = {
+                                ...newCourse,
+                                courseType: 'both',
+                                courseCodeLab: labCourse.courseCode,
+                                courseNameLab: labCourse.courseName,
+                                courseSlots: newCourse.courseSlots.map(cs => ({
+                                    ...cs,
+                                    slotFaculties: cs.slotFaculties.map(f => {
+                                        const matched = facultyPairings.get(f.facultyName)?.get(cs.slotName);
+                                        return matched ? { ...f, facultyLabSlot: matched } : f;
+                                    }),
+                                })),
+                            };
+                            changedCourses.push(mergedCourse);
+                            // Remove old lab entry, add merged theory entry
+                            mergedExistingCourses = mergedExistingCourses.filter((_, i) => i !== labIdx);
+                            mergedExistingCourses.push(mergedCourse);
+                            addCourse(mergedCourse);
+                            updateCourse(labCourse.courseCode, mergedCourse);
+                            continue;
                         }
                     }
                     finalNewCourses.push(newCourse);
@@ -859,42 +797,40 @@ export default function PreferencesPage() {
                     return merged;
                 });
 
-                if (isSessionBasedSlotPairingEnabled()) {
-                    changedCourses.push(...finalNewCourses);
-                    
-                    const pairings: { theorySlot: string; labSlot: string; facultyName: string }[] = [];
-                    changedCourses.forEach(course => {
-                        if (course.courseType === 'both') {
-                            course.courseSlots.forEach(cs => {
-                                cs.slotFaculties.forEach(f => {
-                                    if (f.facultyLabSlot) {
-                                        pairings.push({
-                                            theorySlot: cs.slotName,
-                                            labSlot: f.facultyLabSlot,
-                                            facultyName: f.facultyName
-                                        });
-                                    }
-                                });
+                changedCourses.push(...finalNewCourses);
+                
+                const pairings: { theorySlot: string; labSlot: string; facultyName: string }[] = [];
+                changedCourses.forEach(course => {
+                    if (course.courseType === 'both') {
+                        course.courseSlots.forEach(cs => {
+                            cs.slotFaculties.forEach(f => {
+                                if (f.facultyLabSlot) {
+                                    pairings.push({
+                                        theorySlot: cs.slotName,
+                                        labSlot: f.facultyLabSlot,
+                                        facultyName: f.facultyName
+                                    });
+                                }
                             });
-                        }
-                    });
+                        });
+                    }
+                });
 
-                    if (pairings.length > 0) {
-                        const first = pairings[0];
-                        const description = pairings.length === 1
-                            ? `Theory slot ${first.theorySlot} matched with Lab slot ${first.labSlot} for ${first.facultyName}.`
-                            : `Matched ${pairings.length} theory/lab slots session-wise for selected faculties.`;
-                        if (pairings.length === 1) {
-                            showPairingToast(
-                                "Slots Paired Successfully",
-                                description,
-                                first.theorySlot,
-                                first.labSlot,
-                                first.facultyName
-                            );
-                        } else {
-                            showPairingToast("Slots Paired Successfully", description);
-                        }
+                if (pairings.length > 0) {
+                    const first = pairings[0];
+                    const description = pairings.length === 1
+                        ? `Theory slot ${first.theorySlot} matched with Lab slot ${first.labSlot} for ${first.facultyName}.`
+                        : `Matched ${pairings.length} theory/lab slots session-wise for selected faculties.`;
+                    if (pairings.length === 1) {
+                        showPairingToast(
+                            "Slots Paired Successfully",
+                            description,
+                            first.theorySlot,
+                            first.labSlot,
+                            first.facultyName
+                        );
+                    } else {
+                        showPairingToast("Slots Paired Successfully", description);
                     }
                 }
             }
@@ -1051,11 +987,8 @@ export default function PreferencesPage() {
     ]);
 
     const getTourStepName = (stepNum: number) => {
-        if (isSchoolSelectionEnabled) {
-            if (stepNum === 1) return 'preferences-step-school';
-            return `preferences-step-${stepNum - 1}`;
-        }
-        return `preferences-step-${stepNum}`;
+        if (stepNum === 1) return 'preferences-step-school';
+        return `preferences-step-${stepNum - 1}`;
     };
 
     return (
@@ -1078,57 +1011,53 @@ export default function PreferencesPage() {
                             <h1 data-tour="preferences-intro" className="text-[26px] lg:text-3xl font-bold text-black text-center md:text-left animate-lucid-fade-up">Select Your Preferences</h1>
                         </div>
                         <div className="flex items-center gap-3 flex-wrap md:flex-nowrap justify-center md:justify-end w-full md:w-auto">
-                            {isSimplifiedEnabled && (
-                                <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E9F3E8] px-3 py-2 shadow-sm border border-[#D4F4E6]">
-                                    <span className="text-sm font-extrabold text-green-900 whitespace-nowrap">
-                                        Simplified Mode
-                                    </span>
-                                    <button
-                                        type="button"
-                                        role="switch"
-                                        onClick={() => navigateWithLoader('/simplified', 'Switching to Simplified Mode...')}
-                                        aria-checked={false}
-                                        aria-label="Toggle simplified mode"
-                                        className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-[#A7D7C5] hover:bg-[#86cbb3] focus:outline-none cursor-pointer"
-                                    >
-                                        <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
-                                    </button>
-                                </div>
-                            )}
-                            {isFacultyFirstToggleAvailable && (
-                                <div data-tour="preferences-faculty-first-mode" className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#F6E9AB] px-3 py-2 shadow-sm">
-                                    <span className="text-sm font-extrabold text-gray-900 whitespace-nowrap">
-                                        Faculty first mode
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={handleFacultyFirstModeHelp}
-                                        aria-label="What is faculty first mode?"
-                                        title="What is faculty first mode?"
-                                        className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F0C73C] font-extrabold leading-none text-gray-900 shadow-sm transition-colors hover:bg-[#E6B829] focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900"
-                                    >
-                                        ?
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="switch"
-                                        onClick={handleFacultyFirstModeToggle}
-                                        aria-checked={isFacultyFirstMode}
-                                        aria-label="Toggle faculty first mode"
-                                        className={`relative h-7 w-12 rounded-full shadow-inner transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${
-                                            isFacultyFirstMode ? 'bg-[#F0C73C]' : 'bg-white'
+                            <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E9F3E8] px-3 py-2 shadow-sm border border-[#D4F4E6]">
+                                <span className="text-sm font-extrabold text-green-900 whitespace-nowrap">
+                                    Simplified Mode
+                                </span>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    onClick={() => navigateWithLoader('/simplified', 'Switching to Simplified Mode...')}
+                                    aria-checked={false}
+                                    aria-label="Toggle simplified mode"
+                                    className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-[#A7D7C5] hover:bg-[#86cbb3] focus:outline-none cursor-pointer"
+                                >
+                                    <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
+                                </button>
+                            </div>
+                            <div data-tour="preferences-faculty-first-mode" className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#F6E9AB] px-3 py-2 shadow-sm">
+                                <span className="text-sm font-extrabold text-gray-900 whitespace-nowrap">
+                                    Faculty first mode
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={handleFacultyFirstModeHelp}
+                                    aria-label="What is faculty first mode?"
+                                    title="What is faculty first mode?"
+                                    className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F0C73C] font-extrabold leading-none text-gray-900 shadow-sm transition-colors hover:bg-[#E6B829] focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900"
+                                >
+                                    ?
+                                </button>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    onClick={handleFacultyFirstModeToggle}
+                                    aria-checked={isFacultyFirstMode}
+                                    aria-label="Toggle faculty first mode"
+                                    className={`relative h-7 w-12 rounded-full shadow-inner transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${
+                                        isFacultyFirstMode ? 'bg-[#F0C73C]' : 'bg-white'
+                                    }`}
+                                >
+                                    <span
+                                        className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 ${
+                                            isFacultyFirstMode
+                                                ? 'left-6 bg-white'
+                                                : 'left-1 bg-[#D8CF96]'
                                         }`}
-                                    >
-                                        <span
-                                            className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 ${
-                                                isFacultyFirstMode
-                                                    ? 'left-6 bg-white'
-                                                    : 'left-1 bg-[#D8CF96]'
-                                            }`}
-                                        />
-                                    </button>
-                                </div>
-                            )}
+                                    />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1226,36 +1155,34 @@ export default function PreferencesPage() {
                                                             onChange={(e) => setSubjectSearchQuery(e.target.value)}
                                                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-800 bg-white"
                                                         />
-                                                        {isDirectJumpEnabled && (
-                                                            <button
-                                                                type="button"
-                                                                title="Search all subjects regardless of school"
-                                                                aria-label="Search all subjects"
-                                                                onClick={() => {
-                                                                    if (!isSkippedToSubjects) {
-                                                                        posthog.capture('preferences_skipped_to_subject_selection');
-                                                                        setIsSkippedToSubjects(true);
-                                                                        setSelectedSchool(null);
-                                                                        setSelectedDomains([]);
-                                                                        setSelectedSlots([]);
-                                                                        setSelectedFaculties([]);
-                                                                        showSkipToast();
-                                                                    }
-                                                                }}
-                                                                className={`shrink-0 flex items-center justify-center gap-1.5 px-2 h-9 w-[165px] rounded-lg border font-semibold text-xs transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5BDB] cursor-pointer whitespace-nowrap ${
-                                                                    isSkippedToSubjects
-                                                                        ? 'bg-[#3B5BDB] border-[#3B5BDB] text-white shadow-md shadow-[#3B5BDB]/30'
-                                                                        : 'bg-white border-gray-300 text-gray-600 hover:border-[#3B5BDB] hover:text-[#3B5BDB] hover:shadow-sm active:scale-95'
-                                                                }`}
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                    <circle cx="12" cy="12" r="10"/>
-                                                                    <line x1="2" y1="12" x2="22" y2="12"/>
-                                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                                                                </svg>
-                                                                {isSkippedToSubjects ? 'Show All Subjects ✓' : 'Show All Subjects'}
-                                                            </button>
-                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            title="Search all subjects regardless of school"
+                                                            aria-label="Search all subjects"
+                                                            onClick={() => {
+                                                                if (!isSkippedToSubjects) {
+                                                                    posthog.capture('preferences_skipped_to_subject_selection');
+                                                                    setIsSkippedToSubjects(true);
+                                                                    setSelectedSchool(null);
+                                                                    setSelectedDomains([]);
+                                                                    setSelectedSlots([]);
+                                                                    setSelectedFaculties([]);
+                                                                    showSkipToast();
+                                                                }
+                                                            }}
+                                                            className={`shrink-0 flex items-center justify-center gap-1.5 px-2 h-9 w-[165px] rounded-lg border font-semibold text-xs transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5BDB] cursor-pointer whitespace-nowrap ${
+                                                                isSkippedToSubjects
+                                                                    ? 'bg-[#3B5BDB] border-[#3B5BDB] text-white shadow-md shadow-[#3B5BDB]/30'
+                                                                    : 'bg-white border-gray-300 text-gray-600 hover:border-[#3B5BDB] hover:text-[#3B5BDB] hover:shadow-sm active:scale-95'
+                                                            }`}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <circle cx="12" cy="12" r="10"/>
+                                                                <line x1="2" y1="12" x2="22" y2="12"/>
+                                                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                                            </svg>
+                                                            {isSkippedToSubjects ? 'Show All Subjects ✓' : 'Show All Subjects'}
+                                                        </button>
                                                     </div>
                                                     {filteredSubjectsInStep.length > 0 ? filteredSubjectsInStep.map(subject => (
                                                         <button

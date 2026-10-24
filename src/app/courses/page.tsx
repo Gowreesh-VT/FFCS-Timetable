@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { fullCourseData } from '@/lib/type';
-import { clashMap, findMatchingLabSlot, pairTheoryAndLabSlots } from '@/lib/slots';
-import { isSessionBasedSlotPairingEnabled, FEATURE_FLAGS } from '@/lib/featureFlags';
-import { useFeatureFlagEnabled } from '@posthog/react';
+import { clashMap, pairTheoryAndLabSlots } from '@/lib/slots';
 import { generateTT } from '@/lib/utils';
 import { useTimetable } from '@/lib/TimeTableContext';
 import { getPlannerStoredValue, setPlannerStoredValue } from '@/lib/plannerStorage';
@@ -144,26 +142,15 @@ const buildPreferenceCoursesFromRows = (rows: FacultyEntry[]): fullCourseData[] 
             const theorySlotMap = new Map<string, { facultyName: string; facultyLabSlot?: string }[]>();
 
             course.facultySlots.forEach(({ theorySlots, labSlots }, facultyName) => {
-                if (isSessionBasedSlotPairingEnabled()) {
-                    const pairings = pairTheoryAndLabSlots(theorySlots, labSlots);
-                    theorySlots.forEach(theorySlot => {
-                        const labSlot = pairings.get(theorySlot);
-                        if (!theorySlotMap.has(theorySlot)) theorySlotMap.set(theorySlot, []);
-                        theorySlotMap.get(theorySlot)!.push({
-                            facultyName,
-                            ...(labSlot ? { facultyLabSlot: labSlot } : {}),
-                        });
+                const pairings = pairTheoryAndLabSlots(theorySlots, labSlots);
+                theorySlots.forEach(theorySlot => {
+                    const labSlot = pairings.get(theorySlot);
+                    if (!theorySlotMap.has(theorySlot)) theorySlotMap.set(theorySlot, []);
+                    theorySlotMap.get(theorySlot)!.push({
+                        facultyName,
+                        ...(labSlot ? { facultyLabSlot: labSlot } : {}),
                     });
-                } else {
-                    const labSlot = labSlots[0]; // pair with first lab slot
-                    theorySlots.forEach(theorySlot => {
-                        if (!theorySlotMap.has(theorySlot)) theorySlotMap.set(theorySlot, []);
-                        theorySlotMap.get(theorySlot)!.push({
-                            facultyName,
-                            ...(labSlot ? { facultyLabSlot: labSlot } : {}),
-                        });
-                    });
-                }
+                });
                 // Faculty with only lab (no theory) — store as standalone lab slot
                 if (theorySlots.length === 0) {
                     labSlots.forEach(labSlot => {
@@ -248,7 +235,6 @@ export default function CoursesPage() {
     const router = useRouter();
     const { data: session } = useSession();
     const { setTimetableData } = useTimetable();
-    const isSimplifiedEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow) ?? false;
 
     const [allSubjectsMode, setAllSubjectsMode] = useState(false);
     const [faculties, setFaculties] = useState<FacultyEntry[]>([]);
@@ -555,23 +541,21 @@ export default function CoursesPage() {
                         <div className="flex flex-col gap-1">
                             <h1 className="text-3xl sm:text-4xl font-bold text-black">Your Courses</h1>
                         </div>
-                        {isSimplifiedEnabled && (
-                            <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E9F3E8] px-3 py-2 shadow-sm border border-[#D4F4E6]">
-                                <span className="text-sm font-extrabold text-green-900 whitespace-nowrap">
-                                    Simplified Mode
-                                </span>
-                                <button
-                                    type="button"
-                                    role="switch"
-                                    onClick={() => navigateWithLoader('/simplified', 'Switching to Simplified Mode...')}
-                                    aria-checked={false}
-                                    aria-label="Toggle simplified mode"
-                                    className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-[#A7D7C5] hover:bg-[#86cbb3] focus:outline-none cursor-pointer"
-                                >
-                                    <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
-                                </button>
-                            </div>
-                        )}
+                        <div className="shrink-0 flex h-11 items-center gap-2 rounded-[10px] bg-[#E9F3E8] px-3 py-2 shadow-sm border border-[#D4F4E6]">
+                            <span className="text-sm font-extrabold text-green-900 whitespace-nowrap">
+                                Simplified Mode
+                            </span>
+                            <button
+                                type="button"
+                                role="switch"
+                                onClick={() => navigateWithLoader('/simplified', 'Switching to Simplified Mode...')}
+                                aria-checked={false}
+                                aria-label="Toggle simplified mode"
+                                className="relative h-7 w-12 rounded-full shadow-inner transition-colors bg-[#A7D7C5] hover:bg-[#86cbb3] focus:outline-none cursor-pointer"
+                            >
+                                <span className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition-all duration-200 left-1 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Selected Courses Card */}

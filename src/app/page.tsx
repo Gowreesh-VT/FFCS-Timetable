@@ -7,8 +7,6 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { clearPlannerClientCache } from "@/lib/clientCache";
 import { parseName } from "@/lib/utils";
-import { useFeatureFlagEnabled } from "@posthog/react";
-import { FEATURE_FLAGS } from "@/lib/featureFlags";
 
 type FloatingTile = {
   id: number;
@@ -55,7 +53,6 @@ export default function LandingPage() {
   const floatingContainerRef = React.useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
-  const isSimplifiedEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow);
 
   const handleLogout = React.useCallback(() => {
     clearPlannerClientCache({ includeEditingState: true });
@@ -358,55 +355,40 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 relative z-10">
-                      {isSimplifiedEnabled ? (
-                        <>
-                          <button
-                            className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] ring-1 ring-black/5"
-                            onClick={() => {
-                              setOpen(false);
-                              router.push('/simplified');
-                            }}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            
-                            <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
-                               <Image src="/create_new.png" alt="create" width={100} height={100} className="object-contain drop-shadow-md" />
-                            </div>
-                            
-                            <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">Course Selection</h3>
-                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Real-time search & single-page layout</p>
-                            <div className="relative z-10 mt-4 inline-flex items-center px-3 py-1 rounded-full bg-green-100/80 text-green-700 text-[10px] font-bold tracking-wider uppercase border border-green-200/50 shadow-sm">Recommended</div>
-                          </button>
+                      <button
+                        className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] ring-1 ring-black/5"
+                        onClick={() => {
+                          setOpen(false);
+                          router.push('/simplified');
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
+                           <Image src="/create_new.png" alt="create" width={100} height={100} className="object-contain drop-shadow-md" />
+                        </div>
+                        
+                        <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">Course Selection</h3>
+                        <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Real-time search & single-page layout</p>
+                        <div className="relative z-10 mt-4 inline-flex items-center px-3 py-1 rounded-full bg-green-100/80 text-green-700 text-[10px] font-bold tracking-wider uppercase border border-green-200/50 shadow-sm">Recommended</div>
+                      </button>
 
-                          <button
-                            className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)] ring-1 ring-black/5"
-                            onClick={() => {
-                              setOpen(false);
-                              router.push('/preferences');
-                            }}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            
-                            <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
-                               <Image src="/create_new.png" alt="advanced" width={100} height={100} className="object-contain hue-rotate-60 drop-shadow-md" />
-                            </div>
-                            
-                            <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">Advanced Preferences</h3>
-                            <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Classic step-by-step slot & faculty priorities</p>
-                          </button>
-                        </>
-                      ) : (
-                        <button 
-                          className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] ring-1 ring-black/5 md:col-span-2 md:col-start-2 lg:col-span-1 lg:col-start-2" 
-                          onClick={() => { setOpen(false); router.push('/preferences'); }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
-                            <Image src="/create_new.png" alt="create" width={100} height={100} className="object-contain drop-shadow-md" />
-                          </div>
-                          <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-green-700 transition-colors">Create a new one</h3>
-                        </button>
-                      )}
+                      <button
+                        className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)] ring-1 ring-black/5"
+                        onClick={() => {
+                          setOpen(false);
+                          router.push('/preferences');
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <div className="relative z-10 mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out">
+                           <Image src="/create_new.png" alt="advanced" width={100} height={100} className="object-contain hue-rotate-60 drop-shadow-md" />
+                        </div>
+                        
+                        <h3 className="relative z-10 font-bold text-gray-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">Advanced Preferences</h3>
+                        <p className="relative z-10 text-xs text-gray-500 leading-relaxed font-medium text-center max-w-none m-0" style={{ maxWidth: 'none', margin: 0 }}>Classic step-by-step slot & faculty priorities</p>
+                      </button>
                       
                       <button
                         className="group relative flex flex-col items-center justify-start bg-white/70 hover:bg-white border border-white/80 rounded-[24px] p-6 text-center cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.12)] ring-1 ring-black/5"

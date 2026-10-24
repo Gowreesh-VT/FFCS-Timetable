@@ -5,11 +5,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
 import posthog from 'posthog-js';
-import { useFeatureFlagEnabled } from '@posthog/react';
 import axios from 'axios';
 import type { AxiosError } from 'axios';
 
-import { FEATURE_FLAGS } from '@/lib/featureFlags';
 import { useTimetable } from '@/lib/TimeTableContext';
 import { usePreferences } from '@/lib/PreferencesContext';
 import ModeHelpDialog from '@/components/ModeHelpDialog';
@@ -433,7 +431,6 @@ export default function CourseSelectionPage() {
     const { selectedScheme, setSelectedScheme } = usePreferences();
     
     // Feature Flag check
-    const isSimplifiedEnabled = useFeatureFlagEnabled(FEATURE_FLAGS.simplifiedFlow);
 
     // Local selections
     const [selectedOptions, setSelectedOptions] = useState<CourseOption[]>([]);
@@ -1261,14 +1258,7 @@ export default function CourseSelectionPage() {
         router.push('/timetable');
     };
 
-    // If flag is disabled and loaded, redirect back to preferences
-    useEffect(() => {
-        if (!isSimplifiedEnabled) {
-            router.replace('/preferences');
-        }
-    }, [isSimplifiedEnabled, router]);
-
-    if (!loaded || isSimplifiedEnabled === undefined) {
+    if (!loaded) {
         return (
             <div className="min-h-screen bg-[#F5E6D3] flex items-center justify-center font-sans">
                 <div className="flex flex-col items-center gap-4">
