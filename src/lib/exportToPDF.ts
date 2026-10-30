@@ -1,6 +1,11 @@
 import html2canvas from 'html2canvas';
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
+
+// 2x keeps text crisp when zoomed; JPEG at this quality is ~90x smaller than
+// the uncompressed PNG jsPDF would otherwise embed.
+const EXPORT_SCALE = 2;
+const JPEG_QUALITY = 0.92;
 
 /**
  * Exports a given HTML element to PDF.
@@ -95,21 +100,24 @@ export const exportToPDF = async (
 
 
     try {
-        const buildPdfFromImage = (imgData: string, imgWidth: number, imgHeight: number) => {
+        // Size the page in CSS pixels so the image is embedded at EXPORT_SCALE dpi
+        // rather than producing an oversized page.
+        const buildPdfFromImage = (imgData: string, pageWidth: number, pageHeight: number) => {
             const pdf = new jsPDF({
-                orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+                orientation: pageWidth > pageHeight ? 'landscape' : 'portrait',
                 unit: 'px',
-                format: [imgWidth, imgHeight],
+                format: [pageWidth, pageHeight],
+                compress: true,
             });
 
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
             pdf.save(filename);
         };
 
         try {
             const canvas = await html2canvas(element, {
                 backgroundColor: '#FFFBF0',
-                scale: 3,
+                scale: EXPORT_SCALE,
                 width: element.scrollWidth,
                 height: element.scrollHeight,
                 windowWidth: element.scrollWidth,
@@ -135,20 +143,25 @@ export const exportToPDF = async (
                 },
             });
 
-            buildPdfFromImage(canvas.toDataURL('image/png'), canvas.width, canvas.height);
+            buildPdfFromImage(
+                canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+                canvas.width / EXPORT_SCALE,
+                canvas.height / EXPORT_SCALE,
+            );
         } catch (error) {
             console.warn('html2canvas failed, falling back to html-to-image:', error);
             try {
-                const imgData = await toPng(element, {
+                const imgData = await toJpeg(element, {
                     backgroundColor: '#FFFBF0',
                     cacheBust: true,
-                    pixelRatio: 3,
+                    pixelRatio: EXPORT_SCALE,
+                    quality: JPEG_QUALITY,
                     canvasWidth: element.scrollWidth,
                     canvasHeight: element.scrollHeight,
                     skipAutoScale: true,
                 });
 
-                buildPdfFromImage(imgData, element.scrollWidth * 3, element.scrollHeight * 3);
+                buildPdfFromImage(imgData, element.scrollWidth, element.scrollHeight);
             } catch (fallbackError) {
                 console.error('Fallback PDF export failed:', fallbackError);
                 throw error; // Throw the original html2canvas error for better debugging logs
