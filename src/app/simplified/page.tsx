@@ -12,7 +12,7 @@ import { useTimetable } from '@/lib/TimeTableContext';
 import { usePreferences } from '@/lib/PreferencesContext';
 import ModeHelpDialog from '@/components/ModeHelpDialog';
 import { getPlannerStoredValue, setPlannerStoredValue } from '@/lib/plannerStorage';
-import { generateTT, parseName } from '@/lib/utils';
+import { generateTT, getPageWindow, parseName } from '@/lib/utils';
 import { clearPlannerClientCache } from '@/lib/clientCache';
 import LoginModal from '@/components/loginPopup';
 import SmallFooter from '@/components/SmallFooter';
@@ -2001,19 +2001,17 @@ export default function CourseSelectionPage() {
                                         «
                                     </button>
                                     <div className="flex gap-1">
-                                        {[0, 1, 2, 3].map(idx => (
-                                            idx < totalCombinations && (
-                                                <button
-                                                    key={idx}
-                                                    onClick={() => setCurrentIndex(idx)}
-                                                    className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md md:rounded-lg font-bold text-[12px] md:text-sm transition-all ${currentIndex === idx
-                                                        ? 'bg-white text-black shadow-sm'
-                                                        : 'bg-transparent text-black hover:bg-white/40'
-                                                        }`}
-                                                >
-                                                    {idx + 1}
-                                                </button>
-                                            )
+                                        {getPageWindow(currentIndex, totalCombinations).map(idx => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setCurrentIndex(idx)}
+                                                className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md md:rounded-lg font-bold text-[12px] md:text-sm transition-all ${currentIndex === idx
+                                                    ? 'bg-white text-black shadow-sm'
+                                                    : 'bg-transparent text-black hover:bg-white/40'
+                                                    }`}
+                                            >
+                                                {idx + 1}
+                                            </button>
                                         ))}
                                     </div>
                                     <button
@@ -2022,6 +2020,9 @@ export default function CourseSelectionPage() {
                                     >
                                         »
                                     </button>
+                                    <span className="px-2 text-[12px] md:text-sm font-semibold text-black whitespace-nowrap">
+                                        {currentIndex + 1} / {totalCombinations}
+                                    </span>
                                 </div>
                             )}
                         </div>

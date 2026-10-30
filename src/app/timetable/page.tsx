@@ -10,7 +10,7 @@ import LoginModal from '@/components/loginPopup';
 import Image from 'next/image';
 import { useTimetable } from '@/lib/TimeTableContext';
 import { exportToPDF } from '@/lib/exportToPDF';
-import { generateTT } from '@/lib/utils';
+import { generateTT, getPageWindow } from '@/lib/utils';
 import { getSlotViewPayload } from '@/lib/slot-view';
 import { cleanSlot } from '@/lib/slots';
 import { getCourseCredits } from '@/lib/chennaiCatalog';
@@ -784,19 +784,17 @@ export default function TimetablePage() {
                                     «
                                 </button>
                                 <div className="flex gap-1">
-                                    {[0, 1, 2, 3].map(idx => (
-                                        idx < (timetableData?.length || 0) && (
-                                            <button
-                                                key={idx}
-                                                onClick={() => setCurrentIndex(idx)}
-                                                className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md md:rounded-lg font-bold text-[12px] md:text-sm transition-all ${currentIndex === idx
-                                                    ? 'bg-white text-black shadow-sm'
-                                                    : 'bg-transparent text-black hover:bg-white/40'
-                                                    }`}
-                                            >
-                                                {idx + 1}
-                                            </button>
-                                        )
+                                    {getPageWindow(currentIndex, timetableData?.length || 0).map(idx => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentIndex(idx)}
+                                            className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md md:rounded-lg font-bold text-[12px] md:text-sm transition-all ${currentIndex === idx
+                                                ? 'bg-white text-black shadow-sm'
+                                                : 'bg-transparent text-black hover:bg-white/40'
+                                                }`}
+                                        >
+                                            {idx + 1}
+                                        </button>
                                     ))}
                                 </div>
                                 <button
@@ -805,6 +803,9 @@ export default function TimetablePage() {
                                 >
                                     »
                                 </button>
+                                <span className="px-2 text-[12px] md:text-sm font-semibold text-black whitespace-nowrap">
+                                    {currentIndex + 1} / {timetableData?.length || 0}
+                                </span>
                             </div>
 
                             {/* Action Bar */}

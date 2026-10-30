@@ -188,6 +188,15 @@ function breakClubbed(combinations: timetableDisplayData[][]): timetableDisplayD
     );
 }
 
+/**
+ * Indices of the page buttons to show: a window of up to `size` pages that
+ * keeps the current page visible as the user moves past the first few.
+ */
+export function getPageWindow(current: number, total: number, size: number = 4): number[] {
+    const start = Math.max(0, Math.min(current - Math.floor(size / 2), total - size));
+    return Array.from({ length: Math.min(size, total) }, (_, i) => start + i);
+}
+
 export function getCurrentDateTime() {
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, '0');
