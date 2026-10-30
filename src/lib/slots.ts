@@ -1,4 +1,5 @@
 import { slot } from '@/lib/type';
+import { getSlotViewPayload } from '@/lib/slot-view';
 
 const slotMap: Record<string, slot[]> = {
     A1: [
@@ -22,7 +23,9 @@ const slotMap: Record<string, slot[]> = {
         { rowStart: 13, rowEnd: 14, colStart: 2, colEnd: 7, slotName: 'D1' },
         { rowStart: 4, rowEnd: 5, colStart: 14, colEnd: 19, slotName: 'D1' },
     ],
-    TD1: [{ rowStart: 16, rowEnd: 17, colStart: 26, colEnd: 31, slotName: 'TD1' }],
+    TD1: [{ rowStart: 10, rowEnd: 11, colStart: 20, colEnd: 25, slotName: 'TD1' }],
+    TBB1: [{ rowStart: 10, rowEnd: 11, colStart: 26, colEnd: 31, slotName: 'TBB1' }],
+    TDD1: [{ rowStart: 16, rowEnd: 17, colStart: 26, colEnd: 31, slotName: 'TDD1' }],
     E1: [
         { rowStart: 16, rowEnd: 17, colStart: 2, colEnd: 7, slotName: 'E1' },
         { rowStart: 7, rowEnd: 8, colStart: 14, colEnd: 19, slotName: 'E1' },
@@ -112,74 +115,7 @@ const slotMap: Record<string, slot[]> = {
     L59: [{ rowStart: 17, rowEnd: 18, colStart: 60, colEnd: 70, slotName: 'L59+L60' }],
 };
 
-export const clashMap: Record<string, string[]> = {
-    A1: ['L1', 'L13'],
-    TA1: ['L27'],
-    TAA1: ['L11'],
-    B1: ['L7', 'L19'],
-    TB1: ['L3', 'L5'],
-    C1: ['L13', 'L25'],
-    TC1: ['L9', 'L11'],
-    TCC1: ['L23'],
-    D1: ['L3', 'L19'],
-    TD1: ['L29'],
-    E1: ['L9', 'L25'],
-    TE1: ['L21', 'L23'],
-    F1: ['L1', 'L15'],
-    TF1: ['L27', 'L29'],
-    G1: ['L7', 'L21'],
-    TG1: ['L5'],
-
-    A2: ['L31', 'L43'],
-    TA2: ['L57'],
-    TAA2: ['L41'],
-    B2: ['L37', 'L49'],
-    TB2: ['L33', 'L35'],
-    TBB2: ['L47'],
-    C2: ['L43', 'L55'],
-    TC2: ['L39', 'L41'],
-    TCC2: ['L53'],
-    D2: ['L33', 'L49'],
-    TD2: ['L45', 'L47'],
-    TDD2: ['L59'],
-    E2: ['L39', 'L55'],
-    TE2: ['L51', 'L53'],
-    F2: ['L31', 'L45'],
-    TF2: ['L57', 'L59'],
-    G2: ['L37', 'L51'],
-    TG2: ['L35'],
-
-    L1: ['A1', 'F1'],
-    L3: ['D1', 'TB1'],
-    L5: ['TB1', 'TG1'],
-    L7: ['B1', 'G1'],
-    L9: ['TC1', 'E1'],
-    L11: ['TAA1', 'TC1'],
-    L13: ['A1', 'C1'],
-    L15: ['F1'],
-    L19: ['B1', 'D1'],
-    L21: ['TE1', 'G1'],
-    L23: ['TCC1', 'TE1'],
-    L25: ['C1', 'E1'],
-    L27: ['TA1', 'TF1'],
-    L29: ['TD1', 'TF1'],
-
-    L31: ['A2', 'F2'],
-    L33: ['D2', 'TB2'],
-    L35: ['TB2', 'TG2'],
-    L37: ['B2', 'G2'],
-    L39: ['TC2', 'E2'],
-    L41: ['TAA2', 'TC2'],
-    L43: ['A2', 'C2'],
-    L45: ['TD2', 'F2'],
-    L47: ['TBB2', 'TD2'],
-    L49: ['B2', 'D2'],
-    L51: ['TE2', 'G2'],
-    L53: ['TCC2', 'TE2'],
-    L55: ['C2', 'E2'],
-    L57: ['TA2', 'TF2'],
-    L59: ['TDD2', 'TF2'],
-};
+export const clashMap: Record<string, string[]> = getSlotViewPayload().conflicts;
 
 export function cleanSlot(slotStr: string): string {
     let s = slotStr.trim();

@@ -99,20 +99,16 @@ export function generateTT(
                         const slotsA = p.slotName.split(/\+|__/);
                         const slotsB = item.slotName.split(/\+|__/);
 
-                        const expandedA = new Set<string>();
+                        // Expand only one side: expanding both makes two slots that merely
+                        // overlap the same lab (e.g. A1 and F1 via L1) look like a clash.
                         const expandedB = new Set<string>();
-
-                        slotsA.forEach(s => {
-                            expandedA.add(s);
-                            if (clashMap[s]) clashMap[s].forEach(x => expandedA.add(x));
-                        });
 
                         slotsB.forEach(s => {
                             expandedB.add(s);
                             if (clashMap[s]) clashMap[s].forEach(x => expandedB.add(x));
                         });
 
-                        for (const slotA of expandedA) {
+                        for (const slotA of slotsA) {
                             if (expandedB.has(slotA)) {
                                 const msg1 = `${p.facultyName} for (${p.courseName})`;
                                 const msg2 = `${item.facultyName} for (${item.courseName})`;
