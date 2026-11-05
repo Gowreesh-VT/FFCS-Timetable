@@ -42,7 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 scripts/load/
-config.bat
 
 certificates
 
@@ -55,3 +54,5 @@ src/data/output_chennai_original.json
 new_courses.json
 
 src/scripts
+.env.local
+.env
