@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node init && next dev -H 0.0.0.0",
-    "build": "node init && next build",
-    "start": "node init && next start",
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx scripts/seed-courses.ts",
     "generate-docs": "npx tsx src/scripts/generate-docs-data.ts"
